@@ -1,0 +1,19 @@
+name: aolib
+version: '${version}'
+main: cat.nyaa.aolib.AoLibPlugin
+api-version: 1.18
+prefix: AOLIB
+load: STARTUP
+authors: [ Takaranoao ]
+depend:
+  - ProtocolLib
+commands:
+  aolib:
+    description: aolib
+    permission: aolib.command
+    permission-message: "You do not have the required permission: <permission>"
+    usage: "/<command> [SubCommand...] [Arguments...] or /<command> help"
+permissions:
+  aolib.command:
+    description: aolib
+    default: true

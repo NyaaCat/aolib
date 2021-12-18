@@ -1,0 +1,72 @@
+import sun.nio.cs.UTF_8
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id("xyz.jpenilla.run-paper") version "1.0.6"
+}
+
+group = 'cat.nyaa'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.dmulloy2.net/repository/public/" }
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.18.1-R0.1-SNAPSHOT'
+
+    compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0-SNAPSHOT"
+    compileOnly 'org.jetbrains:annotations:22.0.0'
+
+    compileOnly 'it.unimi.dsi:fastutil:8.5.6'
+
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.2')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.8.2')
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
+
+
+compileJava{
+    options.compilerArgs += ["-Xlint:deprecation"]
+    options.encoding = 'UTF-8'
+    options.release.set(16)
+}
+
+javadoc{
+    options.encoding = 'UTF-8'
+}
+
+
+test{
+    useJUnitPlatform()
+}
+
+runServer {
+    // Configure the Minecraft version for our task.
+    // This is the only required configuration besides applying the plugin.
+    // Your plugin's jar (or shadowJar if present) will be used automatically.
+    minecraftVersion("1.18.1")
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
