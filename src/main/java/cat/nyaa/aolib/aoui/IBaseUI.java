@@ -25,6 +25,8 @@ public interface IBaseUI {
     @NotNull
     ItemStack getCarriedWindowItem();
 
+    int getSlotSize();
+
     int[] getWindowData();
 
     void onButtonClick(int buttonId);
@@ -32,4 +34,5 @@ public interface IBaseUI {
     void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player);
 
 
+    int getDataSize();
 }

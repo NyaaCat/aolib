@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -32,7 +31,7 @@ public class UIManager {
             @Override
             public void sendInitialData(UIPlayerHold uiPlayerHold, List<ItemStack> items, ItemStack carriedItem, int[] data) {
                 try {
-                    new WrappedClientboundContainerSetContentPacket(uiPlayerHold.getHoldUI().getWindowId(), uiPlayerHold.incrementStateId(), items, carriedItem).sendServerPacket(uiPlayerHold.getPlayer());
+                    new WrappedClientboundContainerSetContentPacket(uiPlayerHold.getWindowId(), uiPlayerHold.incrementStateId(), items, carriedItem).sendServerPacket(uiPlayerHold.getPlayer());
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
@@ -46,7 +45,7 @@ public class UIManager {
             @Override
             public void sendSlotChange(UIPlayerHold uiPlayerHold, int slot, ItemStack itemStack) {
                 try {
-                    new WrappedClientboundContainerSetSlotPacket(uiPlayerHold.getHoldUI().getWindowId(), uiPlayerHold.incrementStateId(), slot, itemStack).sendServerPacket(uiPlayerHold.getPlayer());
+                    new WrappedClientboundContainerSetSlotPacket(uiPlayerHold.getWindowId(), uiPlayerHold.incrementStateId(), slot, itemStack).sendServerPacket(uiPlayerHold.getPlayer());
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
@@ -69,7 +68,7 @@ public class UIManager {
 
             private void broadcastDataValue(UIPlayerHold uiPlayerHold, int id, int value) {
                 try {
-                    new WrappedClientboundContainerSetDataPacket(uiPlayerHold.getHoldUI().getWindowId(), id, value).sendServerPacket(uiPlayerHold.getPlayer());
+                    new WrappedClientboundContainerSetDataPacket(uiPlayerHold.getWindowId(), id, value).sendServerPacket(uiPlayerHold.getPlayer());
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
@@ -86,7 +85,7 @@ public class UIManager {
         HandlerList.unregisterAll(eventListener);
     }
 
-    protected void flashPlayerUI() {
+    protected void flashPlayerUIList() {
         List<UUID> willBeRemoved = new ArrayList<>();
         for (UUID uuid : playerUI.keySet()) {
             Player player = Bukkit.getPlayer(uuid);
@@ -112,7 +111,7 @@ public class UIManager {
         UUID playerId = player.getUniqueId();
         if (playerUI.containsKey(playerId)) {
             try {
-                new WrappedClientboundContainerClosePacket(playerUI.get(playerId).getHoldUI().getWindowId()).sendServerPacket(player);
+                new WrappedClientboundContainerClosePacket(playerUI.get(playerId).getWindowId()).sendServerPacket(player);
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
             }
@@ -133,15 +132,16 @@ public class UIManager {
         openWindow(player, ui);
     }
 
-    public boolean sendAllData(Player player) {
-        UUID playerId = player.getUniqueId();
-        if (!playerUI.containsKey(playerId)) {
-            return false;
-        }
-        UIPlayerHold ui = playerUI.get(playerId);
-        uiSynchronizer.sendInitialData(ui, ui.getHoldUI().getWindowItem(),ui.getHoldUI().getCarriedWindowItem(),ui.getHoldUI().getWindowData());
-        return true;
-    }
+//    public boolean sendAllData(Player player) {
+//        UUID playerId = player.getUniqueId();
+//        if (!playerUI.containsKey(playerId)) {
+//            return false;
+//        }
+//        UIPlayerHold ui = playerUI.get(playerId);
+//        ui.broadcastFullState();
+//        //uiSynchronizer.sendInitialData(ui, ui.getHoldUI().getWindowItem(),ui.getHoldUI().getCarriedWindowItem(),ui.getHoldUI().getWindowData());
+//        return true;
+//    }
 
 
     protected void closeWindow(UUID playerId) {
@@ -156,38 +156,69 @@ public class UIManager {
         if (playerUI.containsKey(playerId)) {
             closeWindow(playerId);
         }
-        playerUI.put(playerId, new UIPlayerHold(ui,player));
+        playerUI.put(playerId, new UIPlayerHold(ui, player, this.uiSynchronizer));
+        //sendAllData
+    }
+
+    protected List<Player> getPlayerListByUi(IBaseUI ui) {
+        List<Player> result = new ArrayList<>();
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            UUID playerId = player.getUniqueId();
+            if (playerUI.containsKey(playerId)) {
+                if (playerUI.get(playerId).getHoldUI().equals(ui))
+                    result.add(player);
+            }
+        });
+        return result;
+    }
+
+    public void broadcastChanges(IBaseUI ui) {
+        getPlayerListByUi(ui).forEach(this::broadcastChanges);
+    }
+
+    public void broadcastChanges(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (!playerUI.containsKey(playerId)) return;
+        UIPlayerHold uiPlayerHold = playerUI.get(playerId);
+        broadcastChanges(uiPlayerHold);
+    }
+
+    public void broadcastChanges(UIPlayerHold uiPlayerHold) {
+        uiPlayerHold.broadcastChanges();
     }
 
     public void handlePlayerQuit(Player player) {
         closeWindow(player.getUniqueId());
-        flashPlayerUI();
+        flashPlayerUIList();
     }
 
 
     public void handleWindowClick(Player player, WrappedServerboundContainerClickPacket wrappedPacket) {
         UUID playerId = player.getUniqueId();
         if (!playerUI.containsKey(playerId)) return;
+        UIPlayerHold uiPlayerHold = playerUI.get(playerId);
         plugin.getLogger().info(String.valueOf(wrappedPacket.getContainerId()));
-        if (playerUI.get(playerId).getHoldUI().getWindowId() != wrappedPacket.getContainerId()) return;
-        boolean flag = wrappedPacket.getStateId() != playerUI.get(playerId).getStateId();
-        playerUI.get(playerId).getHoldUI().onWindowClick(wrappedPacket.getSlotNum(), wrappedPacket.getButtonNum(), wrappedPacket.getClickType(), player);
-        //if(flag)sendAllWindowItem(player);
-        //todo
-
+        if (uiPlayerHold.getWindowId() != wrappedPacket.getContainerId()) return;
+        boolean flag = wrappedPacket.getStateId() != uiPlayerHold.getStateId();
+        uiPlayerHold.getHoldUI().onWindowClick(wrappedPacket.getSlotNum(), wrappedPacket.getButtonNum(), wrappedPacket.getClickType(), player);
+        if (flag) {
+            uiPlayerHold.broadcastFullState();
+        } else {
+            uiPlayerHold.broadcastChanges();
+        }
     }
 
     public void handleWindowButtonClick(Player player, WrappedServerboundContainerButtonClickPacket wrappedPacket) {
         UUID playerId = player.getUniqueId();
         if (!playerUI.containsKey(playerId)) return;
-        if (playerUI.get(playerId).getHoldUI().getWindowId() != wrappedPacket.getContainerId()) return;
+        if (playerUI.get(playerId).getWindowId() != wrappedPacket.getContainerId()) return;
         playerUI.get(playerId).getHoldUI().onButtonClick(wrappedPacket.getButtonId());
     }
 
     public void handleWindowClose(Player player, WrappedServerboundContainerClosePacket wrappedPacket) {
         UUID playerId = player.getUniqueId();
         if (!playerUI.containsKey(playerId)) return;
-        if (playerUI.get(playerId).getHoldUI().getWindowId() == wrappedPacket.getContainerId()) {
+        if (playerUI.get(playerId).getWindowId() == wrappedPacket.getContainerId()) {
             closeWindow(playerId);
         } else {
             sendCloseWindow(player);

@@ -54,6 +54,11 @@ public class BaseUI implements IBaseUI {
     }
 
     @Override
+    public int getSlotSize() {
+        return 54;//GENERIC_9x6
+    }
+
+    @Override
     public void onButtonClick(int buttonId) {
     }
 
@@ -62,6 +67,11 @@ public class BaseUI implements IBaseUI {
         logger.info(String.valueOf(slotNum));
         logger.info(String.valueOf(buttonNum));
         logger.info(clickType.name());
+    }
+
+    @Override
+    public int getDataSize() {
+        return 0;
     }
 
     @Override
