@@ -200,7 +200,14 @@ public class UIManager {
         plugin.getLogger().info(String.valueOf(wrappedPacket.getContainerId()));
         if (uiPlayerHold.getWindowId() != wrappedPacket.getContainerId()) return;
         boolean flag = wrappedPacket.getStateId() != uiPlayerHold.getStateId();
+        uiPlayerHold.suppressRemoteUpdates();
+
         uiPlayerHold.getHoldUI().onWindowClick(wrappedPacket.getSlotNum(), wrappedPacket.getButtonNum(), wrappedPacket.getClickType(), player);
+
+        wrappedPacket.getChangedSlots().forEach(uiPlayerHold::setRemoteSlotNoCopy);
+
+        uiPlayerHold.setRemoteCarried(wrappedPacket.getCarriedItem());
+        uiPlayerHold.resumeRemoteUpdates();
         if (flag) {
             uiPlayerHold.broadcastFullState();
         } else {

@@ -70,6 +70,10 @@ public class UIPlayerHold {
         this.remoteSlots.set(slotId, itemStack);
     }
 
+    public void setRemoteCarried(ItemStack itemStack) {
+        this.remoteCarried = itemStack.clone();
+    }
+
     public void broadcastFullState() {
         this.sendAllDataToRemote();
     }
@@ -110,6 +114,14 @@ public class UIPlayerHold {
             int j = data[i];
             this.synchronizeDataSlotToRemote(i, j);
         }
+    }
+
+    public void suppressRemoteUpdates() {
+        this.suppressRemoteUpdates = true;
+    }
+
+    public void resumeRemoteUpdates() {
+        this.suppressRemoteUpdates = false;
     }
 
     private void synchronizeSlotToRemote(int slotId, ItemStack itemStack, Supplier<ItemStack> stackClone) {

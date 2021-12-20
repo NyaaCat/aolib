@@ -4,14 +4,18 @@ import cat.nyaa.aolib.network.data.DataClickType;
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.BukkitConverters;
+import com.comphenix.protocol.wrappers.Converters;
 import org.bukkit.inventory.ItemStack;
 
-public class WrappedServerboundContainerClickPacket  extends AbstractWrappedPacket {
+import java.util.Map;
+
+public class WrappedServerboundContainerClickPacket extends AbstractWrappedPacket {
 
     public final static PacketType PACKET_TYPE = PacketType.Play.Client.WINDOW_CLICK;
 
     public WrappedServerboundContainerClickPacket(PacketContainer handle) {
-        super(handle,PACKET_TYPE);
+        super(handle, PACKET_TYPE);
     }
 
     public int getContainerId() {
@@ -35,7 +39,11 @@ public class WrappedServerboundContainerClickPacket  extends AbstractWrappedPack
     }
 
     public ItemStack getCarriedItem() {
-        return  getPacket().getItemModifier().read(5);
+        return getPacket().getItemModifier().read(0);
+    }
+
+    public Map<Integer, ItemStack> getChangedSlots() {
+        return getPacket().getMaps(Converters.passthrough(Integer.class), BukkitConverters.getItemStackConverter()).read(0);
     }
 
 //    public Int2ObjectMap<ItemStack> getChangedSlots() {
