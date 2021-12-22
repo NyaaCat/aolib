@@ -63,10 +63,12 @@ public class UIPlayerHold {
     }
 
     public void setRemoteSlot(int slotId, ItemStack itemStack) {
+        if (slotId < 0 || slotId >= remoteSlots.size()) return;
         this.remoteSlots.set(slotId, itemStack.clone());
     }
 
     public void setRemoteSlotNoCopy(int slotId, ItemStack itemStack) {
+        if (slotId < 0 || slotId >= remoteSlots.size()) return;
         this.remoteSlots.set(slotId, itemStack);
     }
 
@@ -88,7 +90,7 @@ public class UIPlayerHold {
         this.remoteCarried = this.getHoldUI().getCarriedWindowItem().clone();
 
 
-        int[] data = getHoldUI().getWindowData();
+        int[] data = getWindowData();
         for (int i = 0; i < data.length; i++) {
             this.remoteDataSlots.set(i, data[i]);
         }
@@ -109,7 +111,7 @@ public class UIPlayerHold {
         }
         this.synchronizeCarriedToRemote();
 
-        int[] data = getHoldUI().getWindowData();
+        int[] data = getWindowData();
         for (int i = 0; i < data.length; i++) {
             int j = data[i];
             this.synchronizeDataSlotToRemote(i, j);
@@ -162,7 +164,7 @@ public class UIPlayerHold {
     }
 
     public List<ItemStack> getWindowItem() {
-        List<ItemStack> slots = getHoldUI().getWindowItem();
+        List<ItemStack> slots = getHoldUI().getWindowItem(getPlayer());
         int slotSize = getHoldUI().getSlotSize();
         slots = slots.subList(0, Math.min(slotSize, slots.size()));
         while (slots.size() < slotSize) {
@@ -176,7 +178,7 @@ public class UIPlayerHold {
     }
 
     public List<Integer> getWindowDataList() {
-        int[] dataArray = getHoldUI().getWindowData();
+        int[] dataArray = getHoldUI().getWindowData(getPlayer());
         int dataSize = getHoldUI().getDataSize();
         return getWindowDataList(dataArray, dataSize);
     }
@@ -197,7 +199,7 @@ public class UIPlayerHold {
     }
 
     public int[] getWindowData() {
-        int[] dataArray = getHoldUI().getWindowData();
+        int[] dataArray = getHoldUI().getWindowData(getPlayer());
         int dataSize = getHoldUI().getDataSize();
         if (dataArray.length == dataSize) return dataArray;
         return Ints.toArray(getWindowDataList(dataArray, dataSize));

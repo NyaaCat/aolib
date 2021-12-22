@@ -20,19 +20,18 @@ public interface IBaseUI {
     BaseComponent getTitle();
 
     @NotNull
-    List<ItemStack> getWindowItem();
+    List<ItemStack> getWindowItem(Player player);
 
     @NotNull
     ItemStack getCarriedWindowItem();
 
     int getSlotSize();
 
-    int[] getWindowData();
+    int[] getWindowData(Player player);
 
-    void onButtonClick(int buttonId);
+    void onButtonClick(int buttonId, Player player);
 
     void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player);
-
 
     int getDataSize();
 }
