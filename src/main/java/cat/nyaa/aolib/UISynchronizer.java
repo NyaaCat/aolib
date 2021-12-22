@@ -1,6 +1,5 @@
 package cat.nyaa.aolib;
 
-import cat.nyaa.aolib.aoui.IBaseUI;
 import cat.nyaa.aolib.aoui.UIPlayerHold;
 import org.bukkit.inventory.ItemStack;
 

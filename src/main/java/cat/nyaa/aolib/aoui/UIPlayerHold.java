@@ -18,9 +18,9 @@ public class UIPlayerHold {
     private final Player player;
     private final List<ItemStack> remoteSlots;
     private final List<Integer> remoteDataSlots;
+    private final UISynchronizer uiSynchronizer;
     private ItemStack remoteCarried;
     private int stateId;
-    private final UISynchronizer uiSynchronizer;
     private boolean suppressRemoteUpdates;
 
     public UIPlayerHold(IBaseUI holdUI, Player player, UISynchronizer uiSynchronizer) {
@@ -41,12 +41,12 @@ public class UIPlayerHold {
 
     }
 
-    public void setStateId(int id) {//setItem,initializeContents
-        this.stateId = id;
-    }
-
     public int getStateId() {
         return stateId;
+    }
+
+    public void setStateId(int id) {//setItem,initializeContents
+        this.stateId = id;
     }
 
     public int incrementStateId() {

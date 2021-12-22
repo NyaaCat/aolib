@@ -5,11 +5,11 @@ import com.comphenix.protocol.events.PacketContainer;
 
 public interface IPacket {
 
-    PacketType getHandlePacketType();
-
     static PacketType getPacketType() {
         return null;
     }
+
+    PacketType getHandlePacketType();
 
     PacketContainer getPacket();
 }

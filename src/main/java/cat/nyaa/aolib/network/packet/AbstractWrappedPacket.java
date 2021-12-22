@@ -8,12 +8,12 @@ import org.bukkit.entity.Player;
 import java.lang.reflect.InvocationTargetException;
 
 public class AbstractWrappedPacket implements IPacket {
+    private final PacketContainer handle;
+
     protected AbstractWrappedPacket(PacketContainer handle, PacketType packetType) throws IllegalArgumentException {
         if (!handle.getType().equals(packetType)) throw new IllegalArgumentException();
         this.handle = handle;
     }
-
-    private final PacketContainer handle;
 
     public PacketContainer getHandle() {
         return this.handle;

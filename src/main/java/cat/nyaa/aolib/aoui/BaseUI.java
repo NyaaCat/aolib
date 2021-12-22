@@ -1,6 +1,5 @@
 package cat.nyaa.aolib.aoui;
 
-import cat.nyaa.aolib.AoLibPlugin;
 import cat.nyaa.aolib.aoui.item.EmptyUIItem;
 import cat.nyaa.aolib.aoui.item.IUiItem;
 import cat.nyaa.aolib.aoui.item.PlayerInventoryItem;

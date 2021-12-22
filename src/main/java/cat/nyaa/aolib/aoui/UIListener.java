@@ -15,7 +15,7 @@ public class UIListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerQuitEvent(PlayerQuitEvent event){
+    public void onPlayerQuitEvent(PlayerQuitEvent event) {
         uiManager.handlePlayerQuit(event.getPlayer());
 
     }

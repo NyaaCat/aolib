@@ -219,7 +219,7 @@ public class UIManager {
         UUID playerId = player.getUniqueId();
         if (!playerUI.containsKey(playerId)) return;
         if (playerUI.get(playerId).getWindowId() != wrappedPacket.getContainerId()) return;
-        playerUI.get(playerId).getHoldUI().onButtonClick(wrappedPacket.getButtonId(),player);
+        playerUI.get(playerId).getHoldUI().onButtonClick(wrappedPacket.getButtonId(), player);
     }
 
     public void handleWindowClose(Player player, WrappedServerboundContainerClosePacket wrappedPacket) {
