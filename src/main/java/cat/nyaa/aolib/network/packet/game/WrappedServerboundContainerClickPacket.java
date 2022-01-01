@@ -46,23 +46,4 @@ public class WrappedServerboundContainerClickPacket extends AbstractWrappedPacke
         return getPacket().getMaps(Converters.passthrough(Integer.class), BukkitConverters.getItemStackConverter()).read(0);
     }
 
-//    public Int2ObjectMap<ItemStack> getChangedSlots() {
-//        return getPacket().getModifier().withParamType(MinecraftReflection.getInt2ObjectMapClass(), new EquivalentConverter<Int2ObjectMap<ItemStack>>() {
-//
-//            @Override
-//            public Object getGeneric(Int2ObjectMap<ItemStack> specific) {
-//                return null;
-//            }
-//
-//            @Override
-//            public Int2ObjectMap<ItemStack> getSpecific(Object generic) {
-//                return null;
-//            }
-//
-//            @Override
-//            public Class<Int2ObjectMap<ItemStack>> getSpecificType() {
-//                return null;
-//            }
-//        },MinecraftReflection.getItemStackClass()).read(0);
-//    }
 }
