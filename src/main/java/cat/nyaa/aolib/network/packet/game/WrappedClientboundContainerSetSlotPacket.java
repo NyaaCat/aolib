@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class WrappedClientboundContainerSetSlotPacket extends AbstractWrappedPacket {
     public final static PacketType PACKET_TYPE = PacketType.Play.Server.SET_SLOT;
 
-    public WrappedClientboundContainerSetSlotPacket(PacketContainer handle) throws IllegalArgumentException {
+    protected WrappedClientboundContainerSetSlotPacket(PacketContainer handle) throws IllegalArgumentException {
         super(handle, PACKET_TYPE);
     }
 

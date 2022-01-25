@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public class WrappedClientboundContainerClosePacket extends AbstractWrappedPacket {
     public final static PacketType PACKET_TYPE = PacketType.Play.Server.CLOSE_WINDOW;
 
-    public WrappedClientboundContainerClosePacket(PacketContainer handle) {
+    protected WrappedClientboundContainerClosePacket(PacketContainer handle) {
         super(handle, PACKET_TYPE);
     }
 

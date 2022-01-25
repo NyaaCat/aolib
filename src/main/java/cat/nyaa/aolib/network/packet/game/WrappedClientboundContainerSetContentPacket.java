@@ -15,7 +15,7 @@ public class WrappedClientboundContainerSetContentPacket extends AbstractWrapped
         this(createPacket(windowId, stateId, items, carriedItem));
     }
 
-    public WrappedClientboundContainerSetContentPacket(PacketContainer handle) {
+    protected WrappedClientboundContainerSetContentPacket(PacketContainer handle) {
         super(handle, PACKET_TYPE);
     }
 

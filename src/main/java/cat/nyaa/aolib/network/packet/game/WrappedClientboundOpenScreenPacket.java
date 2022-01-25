@@ -10,7 +10,7 @@ public class WrappedClientboundOpenScreenPacket extends AbstractWrappedPacket {
     public final static PacketType PACKET_TYPE = PacketType.Play.Server.OPEN_WINDOW;
 
 
-    public WrappedClientboundOpenScreenPacket(PacketContainer handle) {
+    protected WrappedClientboundOpenScreenPacket(PacketContainer handle) {
         super(handle, PACKET_TYPE);
     }
 
