@@ -15,27 +15,26 @@ version = '1.0' + "." + buildNumber
 
 repositories {
     mavenCentral()
-    maven { url "https://repo.dmulloy2.net/repository/public/" }
-    maven {
-        name = 'spigotmc-repo'
-        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
+    maven { url = "https://repo.dmulloy2.net/repository/public/" }
+    maven { name = 'spigotmc-repo'; url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url = 'https://oss.sonatype.org/content/repositories/central' }
-    maven {
-        name = 'sonatype'
-        url = 'https://oss.sonatype.org/content/groups/public/'
-    }
+    maven { name = 'sonatype'; url = 'https://oss.sonatype.org/content/groups/public/' }
+    maven { name = 'NyaaCat'; url = 'https://ci.nyaacat.com/maven/' }
 }
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:$minecraftVer-R0.1-SNAPSHOT"
-
     compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0-SNAPSHOT"
+    // other nyaa plugins
+    if (gradle.hasProperty("useLocalDependencies") && gradle.useLocalDependencies) {
+        compileOnly project(":NyaaCore")
+    } else {
+        compileOnly('cat.nyaa:nyaacore:9.0-SNAPSHOT') { transitive = true }
+    }
+
     compileOnly 'org.jetbrains:annotations:22.0.0'
-
     compileOnly 'it.unimi.dsi:fastutil:8.5.6'
-
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.2')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.8.2')
 }
@@ -47,7 +46,7 @@ java {
 compileJava {
     options.compilerArgs += ["-Xlint:deprecation"]
     options.encoding = 'UTF-8'
-    options.release.set(16)
+    options.release.set(17)
 }
 
 javadoc {

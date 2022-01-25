@@ -25,7 +25,6 @@ public class PacketListener extends PacketAdapter {
         if (PacketType.Play.Client.CLOSE_WINDOW.equals(packetType)) {
             WrappedServerboundContainerClosePacket wrappedPacket = new WrappedServerboundContainerClosePacket(event.getPacket());
             uiManager.handleWindowClose(player, wrappedPacket);
-
         } else if (PacketType.Play.Client.WINDOW_CLICK.equals(packetType)) {
             WrappedServerboundContainerClickPacket wrappedPacket = new WrappedServerboundContainerClickPacket(event.getPacket());
             uiManager.handleWindowClick(player, wrappedPacket);

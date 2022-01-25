@@ -1,9 +1,10 @@
 package cat.nyaa.aolib.network.packet.game;
 
+import cat.nyaa.aolib.aoui.utils.NetworkUtils;
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
+import cat.nyaa.aolib.npc.IAoPlayerNpc;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
-import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -19,8 +20,16 @@ public class WrappedClientboundAddPlayerPacket extends AbstractWrappedPacket {
         this(createPacket(entityId, playerId, x, y, z, yRot, xRot));
     }
 
-    public WrappedClientboundAddPlayerPacket(int entityId, UUID playerId, Location location) {
-        this(createPacket(entityId, playerId, location.getX(), location.getY(), location.getZ(), (byte) ((int) (location.getPitch() * 256.0F / 360.0F)), (byte) ((int) (location.getYaw() * 256.0F / 360.0F))));
+    public WrappedClientboundAddPlayerPacket(IAoPlayerNpc playerNpc) {
+        this(createPacket(
+                playerNpc.getEntityId(),
+                playerNpc.getUUID(),
+                playerNpc.getX(),
+                playerNpc.getY(),
+                playerNpc.getZ(),
+                NetworkUtils.rot2byte(playerNpc.getYRot()),
+                NetworkUtils.rot2byte(playerNpc.getXRot())
+        ));
     }
 
     private static @NotNull PacketContainer createPacket(int entityId, UUID playerId, double x, double y, double z, byte yRot, byte xRot) {
