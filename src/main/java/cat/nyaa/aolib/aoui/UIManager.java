@@ -197,7 +197,7 @@ public class UIManager {
         UUID playerId = player.getUniqueId();
         if (!playerUI.containsKey(playerId)) return;
         UIPlayerHold uiPlayerHold = playerUI.get(playerId);
-        plugin.getLogger().info(String.valueOf(wrappedPacket.getContainerId()));
+        //plugin.getLogger().info(String.valueOf(wrappedPacket.getContainerId()));
         if (uiPlayerHold.getWindowId() != wrappedPacket.getContainerId()) return;
         boolean flag = wrappedPacket.getStateId() != uiPlayerHold.getStateId();
         uiPlayerHold.suppressRemoteUpdates();
