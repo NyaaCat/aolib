@@ -1,4 +1,4 @@
-package cat.nyaa.aolib.aoui.utils;
+package cat.nyaa.aolib.utils;
 
 import cat.nyaa.nyaacore.utils.EntityUtils;
 import org.jetbrains.annotations.Contract;

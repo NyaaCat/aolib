@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public interface IAoEntityNpc {
+    @NotNull
     UUID getUUID();
 
     int getEntityId();
@@ -56,13 +57,13 @@ public interface IAoEntityNpc {
     @Nullable
     BaseComponent getDisplayName();
 
-    default AbstractWrappedPacket getAddEntityPacket(){
+    default AbstractWrappedPacket getAddEntityPacket() {
         return new WrappedClientboundAddEntityPacket(this);
     }
 
     EntityType getEntityType();
 
-    default float getYHeadRot(){
+    default float getYHeadRot() {
         return 0.0F;
     }
 }

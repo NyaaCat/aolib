@@ -2,6 +2,7 @@ package cat.nyaa.aolib;
 
 import cat.nyaa.aolib.aoui.BaseUI;
 import cat.nyaa.aolib.aoui.UIManager;
+import cat.nyaa.aolib.utils.EntityDataUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,6 +15,7 @@ public final class AoLibPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        EntityDataUtils.init();
         this.uiManager = new UIManager(this);
         // Plugin startup logic
 

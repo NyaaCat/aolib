@@ -16,10 +16,12 @@ public class WrappedClientboundPlayerInfoPacket extends AbstractWrappedPacket {
     protected WrappedClientboundPlayerInfoPacket(PacketContainer handle) {
         super(handle, PACKET_TYPE);
     }
-    public WrappedClientboundPlayerInfoPacket(EnumWrappers.PlayerInfoAction action,List<PlayerInfoData> playerInfoDataList) {
-        this(createPacket(action,playerInfoDataList));
+
+    public WrappedClientboundPlayerInfoPacket(EnumWrappers.PlayerInfoAction action, List<PlayerInfoData> playerInfoDataList) {
+        this(createPacket(action, playerInfoDataList));
     }
-    public WrappedClientboundPlayerInfoPacket(EnumWrappers.PlayerInfoAction action,PlayerInfoData... playerInfoData) {
+
+    public WrappedClientboundPlayerInfoPacket(EnumWrappers.PlayerInfoAction action, PlayerInfoData... playerInfoData) {
         this(createPacket(action, Lists.newArrayList(playerInfoData)));
     }
 

@@ -1,6 +1,6 @@
 package cat.nyaa.aolib.network.packet.game;
 
-import cat.nyaa.aolib.aoui.utils.NetworkUtils;
+import cat.nyaa.aolib.utils.NetworkUtils;
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import cat.nyaa.aolib.npc.IAoEntityNpc;
 import com.comphenix.protocol.PacketType;

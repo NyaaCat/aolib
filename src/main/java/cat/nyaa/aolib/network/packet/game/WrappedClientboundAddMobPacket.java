@@ -1,16 +1,12 @@
 package cat.nyaa.aolib.network.packet.game;
 
-import cat.nyaa.aolib.aoui.utils.NetworkUtils;
+import cat.nyaa.aolib.utils.NetworkUtils;
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import cat.nyaa.aolib.npc.IAoLivingEntityNpc;
-import cat.nyaa.nyaacore.utils.EntityUtils;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.BukkitConverters;
-import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class WrappedClientboundAddMobPacket extends AbstractWrappedPacket {
