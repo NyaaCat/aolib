@@ -16,7 +16,7 @@ public class WrappedClientboundAddMobPacket extends AbstractWrappedPacket {
         super(handle, PACKET_TYPE);
     }
 
-    protected WrappedClientboundAddMobPacket(IAoLivingEntityNpc livingEntityNpc) {
+    public WrappedClientboundAddMobPacket(IAoLivingEntityNpc livingEntityNpc) {
         this(createPacket(
                 livingEntityNpc.getEntityId(),
                 livingEntityNpc.getUUID(),

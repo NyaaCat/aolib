@@ -1,10 +1,14 @@
 package cat.nyaa.aolib.npc;
 
+import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
+import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddEntityPacket;
+import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddPlayerPacket;
 import cat.nyaa.aolib.npc.data.NpcSkinData;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.collect.Lists;
 import org.bukkit.GameMode;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -22,7 +26,7 @@ public interface IAoPlayerNpc extends IAoLivingEntityNpc {
         return EntityType.PLAYER;
     }
 
-    NpcSkinData getSkinData();
+    @Nullable NpcSkinData getSkinData();
 
     default List<WrappedSignedProperty> getPropertyList() {
         List<WrappedSignedProperty> result = Lists.newArrayList();
@@ -31,5 +35,8 @@ public interface IAoPlayerNpc extends IAoLivingEntityNpc {
             result.add(new WrappedSignedProperty("textures", npcSkinData.texture_value(), npcSkinData.texture_signature()));
         }
         return result;
+    }
+    default AbstractWrappedPacket getAddEntityPacket() {
+        return new WrappedClientboundAddPlayerPacket(this);
     }
 }
