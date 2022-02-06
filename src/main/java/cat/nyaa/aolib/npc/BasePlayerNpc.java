@@ -65,12 +65,12 @@ public class BasePlayerNpc implements IAoPlayerNpc {
 
     @Override
     public float getYRot() {
-        return Location.getPitch();
+        return Location.getYaw();
     }
 
     @Override
     public float getXRot() {
-        return Location.getYaw();
+        return Location.getPitch();
     }
 
     @Override

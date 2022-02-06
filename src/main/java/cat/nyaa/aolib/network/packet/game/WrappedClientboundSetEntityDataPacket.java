@@ -15,7 +15,10 @@ public class WrappedClientboundSetEntityDataPacket extends AbstractWrappedPacket
         super(handle, PACKET_TYPE);
     }
 
-    //todo
+    public WrappedClientboundSetEntityDataPacket(int entityId, List<WrappedWatchableObject> watchableObjects) {
+        this(createPacket(entityId, watchableObjects));
+    }
+
     private static @NotNull PacketContainer createPacket(int id, List<WrappedWatchableObject> watchableObjects) {
         PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
         packetContainer.getIntegers().write(0, id);

@@ -1,8 +1,11 @@
 package cat.nyaa.aolib.npc;
 
 import cat.nyaa.aolib.network.packet.game.WrappedClientboundPlayerInfoPacket;
-import cat.nyaa.aolib.npc.data.NpcSkinData;
-import com.comphenix.protocol.wrappers.*;
+import cat.nyaa.aolib.network.packet.game.WrappedClientboundSetEntityDataPacket;
+import com.comphenix.protocol.wrappers.ComponentConverter;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.PlayerInfoData;
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
@@ -16,6 +19,10 @@ public class NpcManager {
                 new WrappedClientboundPlayerInfoPacket(EnumWrappers.PlayerInfoAction.ADD_PLAYER, getNpcPlayerInfoData((IAoPlayerNpc) npc)).sendServerPacket(target);
 
             npc.getAddEntityPacket().sendServerPacket(target);
+
+            var watchableObjectList = npc.getWatchableObjectList();
+            if (!watchableObjectList.isEmpty())
+                new WrappedClientboundSetEntityDataPacket(npc.getEntityId(), watchableObjectList).sendServerPacket(target);
 
             if (npc instanceof IAoPlayerNpc)
                 new WrappedClientboundPlayerInfoPacket(EnumWrappers.PlayerInfoAction.REMOVE_PLAYER, getNpcPlayerInfoData((IAoPlayerNpc) npc)).sendServerPacket(target);
@@ -35,8 +42,8 @@ public class NpcManager {
     }
 
     private WrappedGameProfile getPlayerNpcGameProfile(IAoPlayerNpc playerNpc) {
-        WrappedGameProfile result = new WrappedGameProfile(playerNpc.getUUID(), playerNpc.getName());
-        playerNpc.getPropertyList().stream().filter(Objects::nonNull).forEach(property -> result.getProperties().put(property.getName(),property));
+        var result = new WrappedGameProfile(playerNpc.getUUID(), playerNpc.getName());
+        playerNpc.getPropertyList().stream().filter(Objects::nonNull).forEach(property -> result.getProperties().put(property.getName(), property));
         return result;
     }
 }

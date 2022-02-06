@@ -2,11 +2,14 @@ package cat.nyaa.aolib.npc;
 
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddEntityPacket;
+import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+import com.google.common.collect.Lists;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface IAoEntityNpc {
@@ -65,5 +68,10 @@ public interface IAoEntityNpc {
 
     default float getYHeadRot() {
         return 0.0F;
+    }
+
+
+    default List<WrappedWatchableObject> getWatchableObjectList() {
+        return Lists.newArrayList();
     }
 }
