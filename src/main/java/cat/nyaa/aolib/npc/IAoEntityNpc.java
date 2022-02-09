@@ -15,6 +15,18 @@ import java.util.UUID;
 
 public interface IAoEntityNpc {
     /**
+     * todo Not completed
+     * Each tick is called when the NPC is active.
+     * It is also called once at 128 tick intervals when the NPC is loaded.
+     *
+     * @param tickNum Number of ticks passed from NpcManager
+     * @param isActive is NPC active
+     */
+    default void onNpcTick(long tickNum ,boolean isActive){//todo NpcTick
+
+    }
+
+    /**
      * A unique name for the index, usually using the primary key in the database.
      *
      * @return unique name
@@ -96,5 +108,9 @@ public interface IAoEntityNpc {
     }
 
     default void onUnload() {
+    }
+
+    default boolean isOnGround() {
+        return true;
     }
 }
