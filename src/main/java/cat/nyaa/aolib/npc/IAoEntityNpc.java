@@ -2,10 +2,11 @@ package cat.nyaa.aolib.npc;
 
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddEntityPacket;
-import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+import cat.nyaa.aolib.npc.data.NpcEntityData;
 import com.google.common.collect.Lists;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +14,14 @@ import java.util.List;
 import java.util.UUID;
 
 public interface IAoEntityNpc {
+    /**
+     * A unique name for the index, usually using the primary key in the database.
+     *
+     * @return unique name
+     */
+    @NotNull
+    String getUniqueNpcName();
+
     @NotNull
     UUID getUUID();
 
@@ -71,7 +80,21 @@ public interface IAoEntityNpc {
     }
 
 
-    default List<WrappedWatchableObject> getWatchableObjectList() {
+    default List<NpcEntityData> getNpcEntityDataList() {
         return Lists.newArrayList();
+    }
+
+    default void onLoad() {
+    }
+
+    default void preSendAdd(Player target, IAoEntityNpc npc) {
+
+    }
+
+    default void preSendRemove(Player target, IAoEntityNpc npc) {
+
+    }
+
+    default void onUnload() {
     }
 }

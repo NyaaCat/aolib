@@ -2,8 +2,6 @@ package cat.nyaa.aolib.npc;
 
 import cat.nyaa.aolib.npc.data.NpcSkinData;
 import cat.nyaa.aolib.utils.NpcUtils;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
@@ -26,16 +24,14 @@ public class BasePlayerNpc implements IAoPlayerNpc {
         this.Location = clone.getLocation();
         this.name = clone.getName() + "Npc";
         this.displayName = clone.getDisplayName();
-        var propertiesMap = WrappedGameProfile.fromPlayer(clone).getProperties();
-        NpcSkinData skin = null;
-        if (propertiesMap.containsKey("textures")) {
-            var textures = propertiesMap.get("textures");
-            for (WrappedSignedProperty texture : textures) {
-                skin = new NpcSkinData(texture.getValue(), texture.getSignature());
-            }
-        }
-        skinData = skin;
 
+        skinData = NpcUtils.getPlayerSkinData(clone);
+
+    }
+
+    @Override
+    public @NotNull String getUniqueNpcName() {
+        return npcId;
     }
 
     @Override
