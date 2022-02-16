@@ -6,22 +6,48 @@ import cat.nyaa.aolib.network.packet.game.WrappedClientboundSetEntityDataPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedClientboundSetEquipmentPacket;
 import cat.nyaa.aolib.npc.data.NpcEntityData;
 import cat.nyaa.aolib.npc.data.NpcEquipmentData;
+import cat.nyaa.aolib.utils.TaskUtils;
 import com.comphenix.protocol.wrappers.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class NpcManager {
-    Map<String, IAoEntityNpc> LoadedNpcSet = new HashMap<>();
+    Map<String, TrackedNpc> TrackedNpcMap = new HashMap<>();
+    NpcPlayerMap npcPlayerMap = new NpcPlayerMap();
+    private long tickNum = 0;
+
     // todo int LoadingBoundary
+
+    public void handleTick() {
+        var activeNameSet = npcPlayerMap.getActiveNpcNameSet();
+        TrackedNpcMap.forEach((s, trackedNpc) -> {
+                    if (activeNameSet.contains(s)) {
+                        trackedNpc.getAoNpc().onNpcTick(tickNum, true);
+                        trackedNpc.sendChanges();
+                    } else {
+                        TaskUtils.mod128TickToRun(tickNum, trackedNpc.getAoNpc().getUUID(), () -> {
+                            trackedNpc.getAoNpc().onNpcTick(tickNum, false);
+                            trackedNpc.sendChanges();
+                        });
+                    }
+                }
+        );
+        this.tickNum++;
+    }
+
+    public NpcPlayerMap getNpcPlayerMap() {
+        return npcPlayerMap;
+    }
 
     public boolean loadNpc(IAoEntityNpc npc) {
         if (!isNpcLoaded(npc)) {
             npc.onLoad();
-            LoadedNpcSet.put(npc.getUniqueNpcName(), npc);
+            TrackedNpcMap.put(npc.getUniqueNpcName(), new TrackedNpc(npc.getUpdateInterval(), this, npc));
             return true;
         }
         return false;
@@ -30,17 +56,17 @@ public class NpcManager {
     public boolean unLoadNpc(IAoEntityNpc npc) {
         if (isNpcLoaded(npc)) {
             npc.onUnload();
-            LoadedNpcSet.remove(npc.getUniqueNpcName());
+            TrackedNpcMap.remove(npc.getUniqueNpcName());
             return true;
         }
         return false;
     }
 
-    public boolean isNpcLoaded(IAoEntityNpc npc) {
-        return LoadedNpcSet.containsKey(npc.getUniqueNpcName());
+    public boolean isNpcLoaded(@NotNull IAoEntityNpc npc) {
+        return TrackedNpcMap.containsKey(npc.getUniqueNpcName());
     }
 
-    public void sendAddNpc(Player target, IAoEntityNpc npc) {
+    public void sendAddNpc(Player target, @NotNull IAoEntityNpc npc) {
         npc.preSendAdd(target, npc);
         try {
             if (npc instanceof IAoPlayerNpc)
@@ -73,7 +99,7 @@ public class NpcManager {
     }
 
     @NotNull
-    private List<Pair<EnumWrappers.ItemSlot, ItemStack>> getLivingEntityEquipmentSlots(IAoLivingEntityNpc livingEntityNpc) {
+    private List<Pair<EnumWrappers.ItemSlot, ItemStack>> getLivingEntityEquipmentSlots(@NotNull IAoLivingEntityNpc livingEntityNpc) {
         NpcEquipmentData npcEquipmentData = livingEntityNpc.getNpcEquipmentData();
         List<Pair<EnumWrappers.ItemSlot, ItemStack>> result = new ArrayList<>();
         if (npcEquipmentData.mainHand() != null)
@@ -117,7 +143,7 @@ public class NpcManager {
         return list;
     }
 
-    public void sendRemoveNpc(Player target, IAoEntityNpc npc) {
+    public void sendRemoveNpc(Player target, @NotNull IAoEntityNpc npc) {
         npc.preSendRemove(target, npc);
         try {
             new WrappedClientboundRemoveEntitiesPacket(npc.getEntityId()).sendServerPacket(target);
@@ -126,7 +152,8 @@ public class NpcManager {
         }
     }
 
-    private PlayerInfoData getNpcPlayerInfoData(IAoPlayerNpc playerNpc) {
+    @Contract("_ -> new")
+    private @NotNull PlayerInfoData getNpcPlayerInfoData(IAoPlayerNpc playerNpc) {
         return new PlayerInfoData(
                 getPlayerNpcGameProfile(playerNpc),
                 playerNpc.getLatency(),
@@ -135,12 +162,18 @@ public class NpcManager {
         );
     }
 
-    private WrappedGameProfile getPlayerNpcGameProfile(IAoPlayerNpc playerNpc) {
+    private @NotNull WrappedGameProfile getPlayerNpcGameProfile(@NotNull IAoPlayerNpc playerNpc) {
         var result = new WrappedGameProfile(playerNpc.getUUID(), playerNpc.getName());
         playerNpc.getNpcPlayerPropertyDataList().stream()
                 .filter(Objects::nonNull)
                 .map(npcPlayerPropertyData -> new WrappedSignedProperty(npcPlayerPropertyData.name(), npcPlayerPropertyData.value(), npcPlayerPropertyData.signature()))
                 .forEach(property -> result.getProperties().put(property.getName(), property));
         return result;
+    }
+
+    public void onNpcTeleport(TrackedNpc trackedNpc) {
+    }
+
+    public void onNpcMove(TrackedNpc trackedNpc, boolean pos, boolean rot) {
     }
 }

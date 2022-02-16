@@ -3,8 +3,10 @@ package cat.nyaa.aolib.npc;
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddEntityPacket;
 import cat.nyaa.aolib.npc.data.NpcEntityData;
+import cat.nyaa.nyaacore.utils.EntityUtils;
 import com.google.common.collect.Lists;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -19,10 +21,10 @@ public interface IAoEntityNpc {
      * Each tick is called when the NPC is active.
      * It is also called once at 128 tick intervals when the NPC is loaded.
      *
-     * @param tickNum Number of ticks passed from NpcManager
+     * @param tickNum  Number of ticks passed from NpcManager
      * @param isActive is NPC active
      */
-    default void onNpcTick(long tickNum ,boolean isActive){//todo NpcTick
+    default void onNpcTick(long tickNum, boolean isActive) {//todo NpcTick
 
     }
 
@@ -33,6 +35,16 @@ public interface IAoEntityNpc {
      */
     @NotNull
     String getUniqueNpcName();
+
+    default int getUpdateInterval() {
+        return EntityUtils.getUpdateInterval(getEntityType());
+    }
+
+    default int getClientTrackingRange() {
+        return EntityUtils.getClientTrackingRange(getEntityType());
+    }
+
+    //todo World getWorld();
 
     @NotNull
     UUID getUUID();

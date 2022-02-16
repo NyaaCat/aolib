@@ -3,10 +3,12 @@ package cat.nyaa.aolib.npc;
 import com.comphenix.protocol.wrappers.Pair;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NpcPlayerMap {
     Multimap<String, UUID> npcPlayerMap = HashMultimap.create();
@@ -63,6 +65,10 @@ public class NpcPlayerMap {
 
     public @NotNull Collection<UUID> getNpcHoldPlayerIds(String npcName) {
         return npcPlayerMap.get(npcName);
+    }
+
+    public Set<Player> getNpcHoldOnlinePlayer(String npcName) {
+        return getNpcHoldPlayerIds(npcName).stream().map(Bukkit::getPlayer).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     public Set<String> getActiveNpcNameSet() {
