@@ -27,7 +27,7 @@ public abstract class WrappedClientboundMoveEntityPacket extends AbstractWrapped
     public static long entityToPacket(double entityP) {
         return (long) Math.floor(entityP * 4096.0D);
     }
-    public static Vector packetToEntity(long xp, long yp, long zp) {
+    public static @NotNull Vector packetToEntity(long xp, long yp, long zp) {
         return (new Vector((double)xp, (double)yp, (double)zp)).multiply((double)2.4414062E-4F);// x/4096
     }
 
