@@ -1,0 +1,8 @@
+command:
+  reload:
+    complete: "reload complete"
+ui:
+  item:
+    button:
+      next: "next page"
+      last: "last page"

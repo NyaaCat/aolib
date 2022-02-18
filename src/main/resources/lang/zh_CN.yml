@@ -1,0 +1,8 @@
+command:
+  reload:
+    complete: "重载完成"
+ui:
+  item:
+    button:
+      next: "下一页"
+      last: "上一页"

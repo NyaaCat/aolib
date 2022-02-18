@@ -176,4 +176,8 @@ public class NpcManager {
 
     public void onNpcMove(TrackedNpc trackedNpc, boolean pos, boolean rot) {
     }
+
+    public void destructor() {
+        //todo
+    }
 }
