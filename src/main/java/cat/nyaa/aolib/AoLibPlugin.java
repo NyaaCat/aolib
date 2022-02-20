@@ -1,29 +1,38 @@
 package cat.nyaa.aolib;
 
-import cat.nyaa.aolib.npc.BasePlayerNpc;
+import cat.nyaa.aolib.aoui.IBaseUI;
+import cat.nyaa.aolib.aoui.PageUI;
+import cat.nyaa.aolib.aoui.UIManager;
+import cat.nyaa.aolib.aoui.item.IUiItem;
 import cat.nyaa.aolib.npc.NpcManager;
 import cat.nyaa.aolib.utils.EntityDataUtils;
+import cat.nyaa.nyaacore.LanguageRepository;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Optional;
 
 public final class AoLibPlugin extends JavaPlugin {
-    private static final boolean DEBUG = true;//todo false
+    private static final boolean DEBUG = false;
     private NpcManager debug_npcManager;
     public static AoLibPlugin instance = null;
     private static AolibI18n I18n = null;
+    private UIManager debug_uiManager;
 
     @Override
     public void onLoad() {
         instance = this;
         EntityDataUtils.init();
-        I18n = new AolibI18n(this, this.getConfig().getString("language", "en_US"));
+        saveDefaultConfig();
+        reloadConfig();
+        I18n = new AolibI18n(this, this.getConfig().getString("language", LanguageRepository.DEFAULT_LANGUAGE));
     }
 
     @Override
@@ -33,6 +42,7 @@ public final class AoLibPlugin extends JavaPlugin {
 
     private void debugEnable() {
         this.debug_npcManager = new NpcManager();
+        this.debug_uiManager = new UIManager(this);
     }
 
     private void onReload() {
@@ -46,6 +56,7 @@ public final class AoLibPlugin extends JavaPlugin {
 
     private void debugDisable() {
         this.debug_npcManager.destructor();
+        this.debug_uiManager.destructor();
     }
 
     public static Optional<AolibI18n> getI18n() {
@@ -71,7 +82,26 @@ public final class AoLibPlugin extends JavaPlugin {
 
     private void debugCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
-            debug_npcManager.sendAddNpc((Player) sender, new BasePlayerNpc((Player) sender));
+            //debug_npcManager.sendAddNpc((Player) sender, new BasePlayerNpc((Player) sender));
+            var itemList = new ArrayList<IUiItem>();
+            for (int i = 0; i < 100; i++) {
+                int finalI = i;
+                itemList.add(new IUiItem() {
+                                 final int num = finalI;
+
+                                 @Override
+                                 public ItemStack getWindowItem(Player player) {
+                                     var item = new ItemStack(Material.BAKED_POTATO);
+                                     var meta = item.getItemMeta();
+                                     if (meta == null) return item;
+                                     meta.setDisplayName(String.valueOf(num));
+                                     item.setItemMeta(meta);
+                                     return item;
+                                 }
+                             }
+                );
+            }
+            debug_uiManager.sendOpenWindow((Player) sender, new PageUI(itemList, (IBaseUI ui) -> debug_uiManager.broadcastChanges(ui), ""));
         }
     }
 }

@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,6 @@ import java.util.stream.Collectors;
 
 
 public class BaseUI implements IBaseUI {
-    public static final Logger logger = Logger.getLogger("AOUI_BASE");
     private static final int WINDOW_ID = 112; // <127
 
     List<IUiItem> uiItemList = new ArrayList<>();
@@ -61,7 +61,7 @@ public class BaseUI implements IBaseUI {
 
     @Override
     public @NotNull BaseComponent getTitle() {
-        return new TextComponent("233");
+        return new TextComponent("");
     }
 
     @Override
@@ -85,9 +85,7 @@ public class BaseUI implements IBaseUI {
 
     @Override
     public void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player) {
-        logger.info(String.valueOf(slotNum));
-        logger.info(String.valueOf(buttonNum));
-        logger.info(clickType.name());
+        player.sendMessage(slotNum +":"+clickType.name());
     }
 
     @Override

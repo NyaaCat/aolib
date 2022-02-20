@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 public interface IClickableUiItem extends IUiItem {
     void onClick(DataClickType clickType, Player player);
 
-    default void onClick(@Nullable IBaseUI ui, @Nullable UIManager uiManager, int slotNum, int buttonNum, DataClickType clickType, Player player) {
+    default void onClick(int slotNum, int buttonNum, DataClickType clickType, Player player) {
         onClick(clickType, player);
     }
 }
