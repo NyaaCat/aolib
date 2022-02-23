@@ -10,6 +10,7 @@ public class AolibI18n extends LanguageRepository {
     public AolibI18n(AoLibPlugin plugin, String lang) {
         this.plugin = plugin;
         this.lang = lang;
+        load();
     }
 
     @Override
