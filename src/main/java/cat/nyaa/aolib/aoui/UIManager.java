@@ -81,6 +81,18 @@ public class UIManager {
     }
 
     public void destructor() {
+        try {
+            flashPlayerUIList();
+            this.playerUI.keySet().forEach(uuid -> {
+                var player = Bukkit.getPlayer(uuid);
+                if (player != null) {
+                    this.sendCloseWindow(player);
+                }
+            });
+            this.playerUI.keySet().forEach(this::closeWindow);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         getProtocolManager().removePacketListener(packetListener);
         HandlerList.unregisterAll(eventListener);
     }
