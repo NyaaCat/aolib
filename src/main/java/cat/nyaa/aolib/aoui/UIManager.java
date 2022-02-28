@@ -205,12 +205,13 @@ public class UIManager {
     }
 
 
-    public void handleWindowClick(Player player, WrappedServerboundContainerClickPacket wrappedPacket) {
+    public boolean handleWindowClick(Player player, WrappedServerboundContainerClickPacket wrappedPacket) {
+        if (!Bukkit.isPrimaryThread()) return false;
         UUID playerId = player.getUniqueId();
-        if (!playerUI.containsKey(playerId)) return;
+        if (!playerUI.containsKey(playerId)) return false;
         UIPlayerHold uiPlayerHold = playerUI.get(playerId);
         //plugin.getLogger().info(String.valueOf(wrappedPacket.getContainerId()));
-        if (uiPlayerHold.getWindowId() != wrappedPacket.getContainerId()) return;
+        if (uiPlayerHold.getWindowId() != wrappedPacket.getContainerId()) return false;
         boolean flag = wrappedPacket.getStateId() != uiPlayerHold.getStateId();
         uiPlayerHold.suppressRemoteUpdates();
 
@@ -225,23 +226,29 @@ public class UIManager {
         } else {
             uiPlayerHold.broadcastChanges();
         }
+        return true;
     }
 
-    public void handleWindowButtonClick(Player player, WrappedServerboundContainerButtonClickPacket wrappedPacket) {
+    public boolean handleWindowButtonClick(Player player, WrappedServerboundContainerButtonClickPacket wrappedPacket) {
+        if (!Bukkit.isPrimaryThread()) return false;
         UUID playerId = player.getUniqueId();
-        if (!playerUI.containsKey(playerId)) return;
-        if (playerUI.get(playerId).getWindowId() != wrappedPacket.getContainerId()) return;
+        if (!playerUI.containsKey(playerId)) return false;
+        if (playerUI.get(playerId).getWindowId() != wrappedPacket.getContainerId()) return false;
         playerUI.get(playerId).getHoldUI().onButtonClick(wrappedPacket.getButtonId(), player);
+        return true;
     }
 
-    public void handleWindowClose(Player player, WrappedServerboundContainerClosePacket wrappedPacket) {
+    public boolean handleWindowClose(Player player, WrappedServerboundContainerClosePacket wrappedPacket) {
+        if (!Bukkit.isPrimaryThread()) return false;
         UUID playerId = player.getUniqueId();
-        if (!playerUI.containsKey(playerId)) return;
+        if (!playerUI.containsKey(playerId)) return false;
         if (playerUI.get(playerId).getWindowId() == wrappedPacket.getContainerId()) {
             closeWindow(playerId);
+            return true;
         } else {
             sendCloseWindow(player);
         }
+        return false;
     }
 }
 

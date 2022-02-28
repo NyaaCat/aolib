@@ -3,6 +3,7 @@ package cat.nyaa.aolib;
 import cat.nyaa.aolib.aoui.IBaseUI;
 import cat.nyaa.aolib.aoui.PageUI;
 import cat.nyaa.aolib.aoui.UIManager;
+import cat.nyaa.aolib.aoui.item.CommandUiItem;
 import cat.nyaa.aolib.aoui.item.IUiItem;
 import cat.nyaa.aolib.npc.NpcManager;
 import cat.nyaa.aolib.utils.EntityDataUtils;
@@ -70,6 +71,7 @@ public final class AoLibPlugin extends JavaPlugin {
         }
         if (args.length >= 1) switch (args[0].toLowerCase(Locale.ROOT)) {
             case "reload":
+                if (!sender.hasPermission("aolib.command.reload")) return false;
                 this.onReload();
                 getI18n().ifPresent(I18n -> sender.sendMessage(I18n.getFormatted("command.reload.complete")));
                 return true;
@@ -85,23 +87,18 @@ public final class AoLibPlugin extends JavaPlugin {
             //debug_npcManager.sendAddNpc((Player) sender, new BasePlayerNpc((Player) sender));
             var itemList = new ArrayList<IUiItem>();
             for (int i = 0; i < 100; i++) {
-                int finalI = i;
-                itemList.add(new IUiItem() {
-                                 final int num = finalI;
-
-                                 @Override
-                                 public ItemStack getWindowItem(Player player) {
-                                     var item = new ItemStack(Material.BAKED_POTATO);
-                                     var meta = item.getItemMeta();
-                                     if (meta == null) return item;
-                                     meta.setDisplayName(String.valueOf(num));
-                                     item.setItemMeta(meta);
-                                     return item;
-                                 }
-                             }
-                );
+                itemList.add(CommandUiItem.create(getDebugItem(i), null, "me " + i, null));
             }
             debug_uiManager.sendOpenWindow((Player) sender, new PageUI(itemList, (IBaseUI ui) -> debug_uiManager.broadcastChanges(ui), ""));
         }
+    }
+
+    private ItemStack getDebugItem(int num) {
+        var item = new ItemStack(Material.BAKED_POTATO);
+        var meta = item.getItemMeta();
+        if (meta == null) return item;
+        meta.setDisplayName(String.valueOf(num));
+        item.setItemMeta(meta);
+        return item;
     }
 }

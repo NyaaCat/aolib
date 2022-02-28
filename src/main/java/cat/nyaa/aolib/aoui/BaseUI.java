@@ -10,11 +10,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 
@@ -85,7 +83,7 @@ public class BaseUI implements IBaseUI {
 
     @Override
     public void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player) {
-        player.sendMessage(slotNum +":"+clickType.name());
+        player.sendMessage(slotNum + ":" + clickType.name());
     }
 
     @Override

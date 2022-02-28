@@ -18,3 +18,6 @@ permissions:
   aolib.command:
     description: aolib
     default: true
+  aolib.command.reload:
+    description: aolib reload
+    default: op

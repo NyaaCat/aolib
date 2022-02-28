@@ -35,7 +35,7 @@ public class CommandUiItem implements IClickableUiItem, IUiItem {
     }
 
     @Nullable
-    public static CommandUiItem create(ItemStack holdItem, @Nullable UIManager uiManager, String command, @Nullable String commandPermission) {
+    public static CommandUiItem create(ItemStack holdItem, @Nullable UIManager uiManager, @NotNull String command, @Nullable String commandPermission) {
         if (AoLibPlugin.instance == null) return null;
         return new CommandUiItem(AoLibPlugin.instance, holdItem, uiManager, null, command, commandPermission);
     }
