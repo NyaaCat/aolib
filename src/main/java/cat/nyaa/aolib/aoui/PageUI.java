@@ -26,7 +26,7 @@ public class PageUI extends BaseUI {
     private final Consumer<IBaseUI> updateConsumer;
     int page = 0;
     @NotNull
-    private String uiTitle;
+    private final String uiTitle;
 
     public PageUI(List<IUiItem> allUiItem, List<IUiItem> buttonItem, Consumer<IBaseUI> updateConsumer, @NotNull String uiTitle) {
         this.allUiItem = allUiItem;
@@ -168,7 +168,7 @@ public class PageUI extends BaseUI {
     @Override
     public void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player) {
         var pageItemAll = getPageUiItemAll();
-        if (slotNum < pageItemAll.size()) {
+        if (slotNum < pageItemAll.size() && slotNum >= 0) {
             var uiItem = pageItemAll.get(slotNum);
             if (uiItem instanceof IClickableUiItem) {
                 ((IClickableUiItem) uiItem).onClick(slotNum, buttonNum, clickType, player);
