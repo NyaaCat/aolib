@@ -3,7 +3,7 @@ package cat.nyaa.aolib.aoui.item;
 import cat.nyaa.aolib.AoLibPlugin;
 import cat.nyaa.aolib.aoui.UIManager;
 import cat.nyaa.aolib.network.data.DataClickType;
-import cat.nyaa.aolib.utils.RunCommandUtils;
+import cat.nyaa.aolib.utils.CommandUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -44,7 +44,7 @@ public class CommandUiItem implements IClickableUiItem, IUiItem {
     public void onClick(DataClickType clickType, Player player) {
         if (clickType.equals(DataClickType.PICKUP)) {
             if (command.isEmpty()) return;
-            RunCommandUtils.executeCommand(sender == null ? player : sender, command, commandPermission, plugin);
+            CommandUtils.runCommand.executeCommand(sender == null ? player : sender, command, commandPermission, plugin);
             if (uiManager != null) {
                 uiManager.sendCloseWindow(player);
             }

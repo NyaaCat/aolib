@@ -30,7 +30,7 @@ public class NpcManager {
                         trackedNpc.getAoNpc().onNpcTick(tickNum, true);
                         trackedNpc.sendChanges();
                     } else {
-                        TaskUtils.mod128TickToRun(tickNum, trackedNpc.getAoNpc().getUUID(), () -> {
+                        TaskUtils.tickScheduler.mod128TickToRun(tickNum, trackedNpc.getAoNpc().getUUID(), () -> {
                             trackedNpc.getAoNpc().onNpcTick(tickNum, false);
                             trackedNpc.sendChanges();
                         });
