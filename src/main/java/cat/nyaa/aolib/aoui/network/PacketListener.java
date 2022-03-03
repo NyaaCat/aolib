@@ -4,14 +4,12 @@ import cat.nyaa.aolib.aoui.UIManager;
 import cat.nyaa.aolib.network.packet.game.WrappedServerboundContainerButtonClickPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedServerboundContainerClickPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedServerboundContainerClosePacket;
+import cat.nyaa.aolib.utils.TaskUtils;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-
-import java.util.concurrent.Callable;
 
 public class PacketListener extends PacketAdapter {
     protected UIManager uiManager;
@@ -24,7 +22,8 @@ public class PacketListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         PacketType packetType = event.getPacketType();
-        Callable<Boolean> callable = () -> {
+
+        var cancel = TaskUtils.async.callSyncAndGet(() -> {
             Player player = event.getPlayer();
             if (PacketType.Play.Client.CLOSE_WINDOW.equals(packetType)) {
                 WrappedServerboundContainerClosePacket wrappedPacket = new WrappedServerboundContainerClosePacket(event.getPacket());
@@ -38,21 +37,7 @@ public class PacketListener extends PacketAdapter {
             } else {
                 throw new IllegalStateException("Unexpected value: " + event.getPacketType());
             }
-        };
-        Boolean cancel = false;
-        if (event.isAsync()) {
-            try {
-                cancel = Bukkit.getScheduler().callSyncMethod(getPlugin(), callable).get();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                cancel = callable.call();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        }, getPlugin());
 
         if (cancel != null && cancel && !event.isReadOnly() && !event.isCancelled()) {
             event.setCancelled(true);
