@@ -42,7 +42,7 @@ public final class AoLibPlugin extends JavaPlugin {
     }
 
     private void debugEnable() {
-        this.debug_npcManager = new NpcManager();
+        this.debug_npcManager = new NpcManager(this);
         this.debug_uiManager = new UIManager(this);
     }
 

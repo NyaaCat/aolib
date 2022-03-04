@@ -2,7 +2,7 @@ package cat.nyaa.aolib.aoui;
 
 
 import cat.nyaa.aolib.UISynchronizer;
-import cat.nyaa.aolib.aoui.network.PacketListener;
+import cat.nyaa.aolib.aoui.network.UIPacketListener;
 import cat.nyaa.aolib.network.packet.game.*;
 import com.comphenix.protocol.wrappers.ComponentConverter;
 import org.bukkit.Bukkit;
@@ -19,13 +19,13 @@ import static com.comphenix.protocol.ProtocolLibrary.getProtocolManager;
 public class UIManager {
     private final Map<UUID, UIPlayerHold> playerUI = new HashMap<>();
     private final Plugin plugin;
-    private final PacketListener packetListener;
+    private final UIPacketListener packetListener;
     private final UIListener eventListener;
     private final UISynchronizer uiSynchronizer;
 
     public UIManager(Plugin plugin) {
         this.plugin = plugin;
-        this.packetListener = new PacketListener(this.plugin, this);
+        this.packetListener = new UIPacketListener(this.plugin, this);
         this.eventListener = new UIListener(this.plugin, this);
         this.uiSynchronizer = new UISynchronizer() {
             @Override

@@ -1,31 +1,45 @@
 package cat.nyaa.aolib.npc;
 
-import cat.nyaa.aolib.network.packet.game.WrappedClientboundPlayerInfoPacket;
-import cat.nyaa.aolib.network.packet.game.WrappedClientboundRemoveEntitiesPacket;
-import cat.nyaa.aolib.network.packet.game.WrappedClientboundSetEntityDataPacket;
-import cat.nyaa.aolib.network.packet.game.WrappedClientboundSetEquipmentPacket;
+import cat.nyaa.aolib.network.packet.game.*;
 import cat.nyaa.aolib.npc.data.NpcEntityData;
 import cat.nyaa.aolib.npc.data.NpcEquipmentData;
+import cat.nyaa.aolib.npc.data.NpcInteractActionData;
+import cat.nyaa.aolib.npc.network.AoNpcPacketListener;
 import cat.nyaa.aolib.utils.TaskUtils;
 import com.comphenix.protocol.wrappers.*;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import static com.comphenix.protocol.ProtocolLibrary.getProtocolManager;
+
 public class NpcManager {
-    Map<String, TrackedNpc> TrackedNpcMap = new HashMap<>();
+    private final Plugin plugin;
+    private final int tickTask;
+    private final AoNpcPacketListener packetListener;
+    Map<String, TrackedNpc> trackedNpcMap = new HashMap<>();
     NpcPlayerMap npcPlayerMap = new NpcPlayerMap();
     private long tickNum = 0;
 
     // todo int LoadingBoundary
 
+    public NpcManager(Plugin plugin) {
+        this.plugin = plugin;
+        this.tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::handleTick, 1, 1);
+        this.packetListener = new AoNpcPacketListener(this.plugin, this);
+        getProtocolManager().addPacketListener(packetListener);
+    }
+
     public void handleTick() {
         var activeNameSet = npcPlayerMap.getActiveNpcNameSet();
-        TrackedNpcMap.forEach((s, trackedNpc) -> {
+        trackedNpcMap.forEach((s, trackedNpc) -> {
                     if (activeNameSet.contains(s)) {
                         trackedNpc.getAoNpc().onNpcTick(tickNum, true);
                         trackedNpc.sendChanges();
@@ -47,7 +61,7 @@ public class NpcManager {
     public boolean loadNpc(IAoEntityNpc npc) {
         if (!isNpcLoaded(npc)) {
             npc.onLoad();
-            TrackedNpcMap.put(npc.getUniqueNpcName(), new TrackedNpc(npc.getUpdateInterval(), this, npc));
+            trackedNpcMap.put(npc.getUniqueNpcName(), new TrackedNpc(npc.getUpdateInterval(), this, npc));
             return true;
         }
         return false;
@@ -56,14 +70,28 @@ public class NpcManager {
     public boolean unLoadNpc(IAoEntityNpc npc) {
         if (isNpcLoaded(npc)) {
             npc.onUnload();
-            TrackedNpcMap.remove(npc.getUniqueNpcName());
+            trackedNpcMap.remove(npc.getUniqueNpcName());
             return true;
         }
         return false;
     }
 
     public boolean isNpcLoaded(@NotNull IAoEntityNpc npc) {
-        return TrackedNpcMap.containsKey(npc.getUniqueNpcName());
+        return trackedNpcMap.containsKey(npc.getUniqueNpcName());
+    }
+
+    public List<IAoEntityNpc> getLoadedNpcList() {
+        return trackedNpcMap.values().stream().map(TrackedNpc::getAoNpc).toList();
+    }
+
+    public Set<String> getLoadedNpcNames() {
+        return trackedNpcMap.keySet();
+    }
+
+    @Nullable
+    public IAoEntityNpc getLoadedNpcByName(String name) {
+        if (trackedNpcMap.containsKey(name)) return trackedNpcMap.get(name).getAoNpc();
+        return null;
     }
 
     public void sendAddNpc(Player target, @NotNull IAoEntityNpc npc) {
@@ -178,6 +206,22 @@ public class NpcManager {
     }
 
     public void destructor() {
+        Bukkit.getScheduler().cancelTask(tickTask);
+        this.getLoadedNpcList().forEach(this::unLoadNpc);
+        getProtocolManager().removePacketListener(packetListener);
         //todo
+    }
+
+    public boolean handleInteract(@NotNull Player player, WrappedServerboundInteractPacket packet) {
+
+        for (String playerHoldNpcName : npcPlayerMap.getPlayerHoldNpcNames(player.getUniqueId())) {
+            if (trackedNpcMap.containsKey(playerHoldNpcName)) {
+                if (trackedNpcMap.get(playerHoldNpcName).getAoNpc().getEntityId() == packet.getEntityId()) {
+                    trackedNpcMap.get(playerHoldNpcName).getAoNpc().onInteract(packet.getEntityId(), NpcInteractActionData.create(packet.getAction()), packet.getUsingSecondaryAction());
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -11,10 +11,10 @@ import com.comphenix.protocol.events.PacketEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class PacketListener extends PacketAdapter {
+public class UIPacketListener extends PacketAdapter {
     protected UIManager uiManager;
 
-    public PacketListener(Plugin plugin, UIManager uiManager) {
+    public UIPacketListener(Plugin plugin, UIManager uiManager) {
         super(plugin, PacketType.Play.Client.CLOSE_WINDOW, PacketType.Play.Client.WINDOW_CLICK, PacketType.Play.Client.ENCHANT_ITEM);
         this.uiManager = uiManager;
     }

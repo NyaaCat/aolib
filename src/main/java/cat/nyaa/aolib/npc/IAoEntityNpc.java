@@ -3,6 +3,7 @@ package cat.nyaa.aolib.npc;
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddEntityPacket;
 import cat.nyaa.aolib.npc.data.NpcEntityData;
+import cat.nyaa.aolib.npc.data.NpcInteractActionData;
 import cat.nyaa.nyaacore.utils.EntityUtils;
 import com.google.common.collect.Lists;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -124,5 +125,9 @@ public interface IAoEntityNpc {
 
     default boolean isOnGround() {
         return true;
+    }
+
+    default void onInteract(int entityId, NpcInteractActionData npcInteractActionData, boolean usingSecondaryAction){
+
     }
 }
