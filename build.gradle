@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id("xyz.jpenilla.run-paper") version "1.0.6"
 }
-def minecraftVer = "1.18.1"
+def minecraftVer = "1.18.2"
 group = 'cat.nyaa'
 archivesBaseName = "${project.name}-mc$minecraftVer"
 
@@ -25,12 +25,12 @@ repositories {
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:$minecraftVer-R0.1-SNAPSHOT"
-    compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0-SNAPSHOT"
+    compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0"
     // other nyaa plugins
     if (gradle.hasProperty("useLocalDependencies") && gradle.useLocalDependencies) {
         compileOnly project(":NyaaCore")
     } else {
-        compileOnly('cat.nyaa:nyaacore:9.0-SNAPSHOT') { transitive = true }
+        compileOnly('cat.nyaa:nyaacore:9.0-SNAPSHOT')
     }
 
     compileOnly 'org.jetbrains:annotations:22.0.0'
