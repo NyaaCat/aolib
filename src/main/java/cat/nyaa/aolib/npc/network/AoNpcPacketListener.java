@@ -19,7 +19,6 @@ public class AoNpcPacketListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         PacketType packetType = event.getPacketType();
-
         var cancel = TaskUtils.async.callSyncAndGet(() -> {
             if (PacketType.Play.Client.USE_ENTITY.equals(packetType)) {
                 return  npcManager.handleInteract(event.getPlayer(),new WrappedServerboundInteractPacket(event.getPacket()));

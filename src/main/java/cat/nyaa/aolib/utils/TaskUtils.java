@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 
 public class TaskUtils {
     public static class tickScheduler {
@@ -76,7 +77,11 @@ public class TaskUtils {
                 if (p == null) p = AoLibPlugin.instance;
                 if (p == null) return null;
                 try {
-                    return Bukkit.getScheduler().callSyncMethod(p, callable).get();
+                    var future = Bukkit.getScheduler().callSyncMethod(p, callable);
+                    return future.get();
+                } catch (CancellationException cancellationException) {
+                    p.getLogger().warning("Task cancelled");
+                    return null;
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
