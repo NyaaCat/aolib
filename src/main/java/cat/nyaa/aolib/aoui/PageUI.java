@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class PageUI extends BaseUI {
-    private final List<IUiItem> allUiItem;
-    private final List<IUiItem> buttonItem;
-    private final Consumer<IBaseUI> updateConsumer;
+    private  List<IUiItem> allUiItem;
+    private  List<IUiItem> buttonItem;
+    private  Consumer<IBaseUI> updateConsumer;
     @NotNull
     private final String uiTitle;
     int page = 0;
@@ -40,6 +40,20 @@ public class PageUI extends BaseUI {
         this.buttonItem = getAllSimpleButtonUiItem(this);
         this.updateConsumer = updateConsumer;
         this.uiTitle = uiTitle;
+    }
+
+    public void setAllUiItem(List<IUiItem> allUiItem) {
+        this.allUiItem = allUiItem;
+        updateConsumer.accept(this);
+    }
+
+    public void setButtonItem(List<IUiItem> buttonItem) {
+        this.buttonItem = buttonItem;
+        updateConsumer.accept(this);
+    }
+
+    public void setUpdateConsumer(Consumer<IBaseUI> updateConsumer) {
+        this.updateConsumer = updateConsumer;
     }
 
     public static @NotNull List<IUiItem> getAllSimpleButtonUiItem(PageUI pageUI) {
