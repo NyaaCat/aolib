@@ -88,5 +88,29 @@ public class TaskUtils {
                 }
             }
         }
+
+        public static boolean callSync(@NotNull Runnable runnable) {
+            return callSync(runnable, null);
+        }
+        public static boolean callSync(@NotNull Runnable runnable, @Nullable Plugin plugin) {
+            if (Bukkit.isPrimaryThread()) {
+                try {
+                    runnable.run();
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            } else {
+                var p = plugin;
+                if (p == null) p = AoLibPlugin.instance;
+                if (p == null) return false;
+                var future = Bukkit.getScheduler().callSyncMethod(p, () -> {
+                    runnable.run();
+                    return null;
+                });
+                return true;
+            }
+        }
     }
 }
