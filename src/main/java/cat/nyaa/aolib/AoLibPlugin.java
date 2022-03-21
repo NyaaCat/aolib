@@ -15,17 +15,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public final class AoLibPlugin extends JavaPlugin {
     private static final boolean DEBUG = false;
     private NpcManager debug_npcManager;
+    @Nullable
     public static AoLibPlugin instance = null;
     private static AolibI18n I18n = null;
     private UIManager debug_uiManager;
+
+    @NotNull
+    @Override
+    public Logger getLogger() {
+        return super.getLogger();
+    }
 
     @Override
     public void onLoad() {
