@@ -10,9 +10,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.comphenix.protocol.ProtocolLibrary.getProtocolManager;
 
@@ -188,15 +190,33 @@ public class UIManager {
         getPlayerListByUi(ui).forEach(this::broadcastChanges);
     }
 
-    public void broadcastChanges(Player player) {
+    public void broadcastFullState(IBaseUI ui) {
+        getPlayerListByUi(ui).forEach(this::broadcastFullState);
+    }
+
+
+    public void broadcastChanges(@NotNull Player player) {
+        getUiPlayerHoldToRun(player, this::broadcastChanges);
+    }
+
+    public void broadcastFullState(Player player) {
+        getUiPlayerHoldToRun(player, this::broadcastFullState);
+    }
+
+    private void getUiPlayerHoldToRun(Player player, Consumer<UIPlayerHold> consumer) {
         UUID playerId = player.getUniqueId();
         if (!playerUI.containsKey(playerId)) return;
         UIPlayerHold uiPlayerHold = playerUI.get(playerId);
-        broadcastChanges(uiPlayerHold);
+        consumer.accept(uiPlayerHold);
     }
+
 
     public void broadcastChanges(UIPlayerHold uiPlayerHold) {
         uiPlayerHold.broadcastChanges();
+    }
+
+    public void broadcastFullState(UIPlayerHold uiPlayerHold) {
+        uiPlayerHold.broadcastFullState();
     }
 
     public void handlePlayerQuit(Player player) {

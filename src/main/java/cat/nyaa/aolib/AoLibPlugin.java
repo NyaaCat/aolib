@@ -98,7 +98,7 @@ public final class AoLibPlugin extends JavaPlugin {
             for (int i = 0; i < 100; i++) {
                 itemList.add(CommandUiItem.create(getDebugItem(i), null, "me " + i, null));
             }
-            debug_uiManager.sendOpenWindow((Player) sender, new PageUI(itemList, (IBaseUI ui) -> debug_uiManager.broadcastChanges(ui), ""));
+            debug_uiManager.sendOpenWindow((Player) sender, new PageUI(itemList, (IBaseUI ui) -> debug_uiManager.broadcastFullState(ui), ""));
         }
     }
 
