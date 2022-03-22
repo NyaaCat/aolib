@@ -132,7 +132,7 @@ public class PageUI extends BaseUI {
 
     @Contract(pure = true)
     public int getMaxPage() {
-        return Math.floorDiv(allUiItem.size(), (4 * 9));
+        return Math.floorDiv(allUiItem.size(), (5 * 9));
     }
 
     @Override
