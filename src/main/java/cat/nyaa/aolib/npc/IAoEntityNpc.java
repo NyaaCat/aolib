@@ -7,7 +7,6 @@ import cat.nyaa.aolib.npc.data.NpcInteractActionData;
 import cat.nyaa.nyaacore.utils.EntityUtils;
 import com.google.common.collect.Lists;
 import net.md_5.bungee.api.chat.BaseComponent;
-import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -127,7 +126,7 @@ public interface IAoEntityNpc {
         return true;
     }
 
-    default void onInteract(int entityId, NpcInteractActionData npcInteractActionData, boolean usingSecondaryAction){
+    default void onInteract(int entityId, NpcInteractActionData npcInteractActionData, boolean usingSecondaryAction) {
 
     }
 }

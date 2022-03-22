@@ -17,15 +17,15 @@ public class WrappedClientboundSetEquipmentPacket extends AbstractWrappedPacket 
         super(handle, PACKET_TYPE);
     }
 
+    public WrappedClientboundSetEquipmentPacket(int entityId, List<Pair<EnumWrappers.ItemSlot, ItemStack>> slots) {
+        this(createPacket(entityId, slots));
+    }
+
     private static @NotNull PacketContainer createPacket(int entityId, List<Pair<EnumWrappers.ItemSlot, ItemStack>> slots) {
         PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
         packetContainer.getIntegers().write(0, entityId);
         packetContainer.getSlotStackPairLists().write(0, slots);
         return packetContainer;
-    }
-
-    public WrappedClientboundSetEquipmentPacket(int entityId, List<Pair<EnumWrappers.ItemSlot, ItemStack>> slots) {
-        this(createPacket(entityId, slots));
     }
 
 }

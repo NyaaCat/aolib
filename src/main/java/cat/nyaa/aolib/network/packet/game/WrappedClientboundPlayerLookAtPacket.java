@@ -5,6 +5,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import org.jetbrains.annotations.NotNull;
+
 //client
 public class WrappedClientboundPlayerLookAtPacket extends AbstractWrappedPacket {
     public final static PacketType PACKET_TYPE = PacketType.Play.Server.LOOK_AT;

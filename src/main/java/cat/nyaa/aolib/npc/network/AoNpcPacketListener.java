@@ -19,11 +19,11 @@ public class AoNpcPacketListener extends PacketAdapter {
     public void onPacketReceiving(PacketEvent event) {
         PacketType packetType = event.getPacketType();
 
-            if (PacketType.Play.Client.USE_ENTITY.equals(packetType)) {
-                npcManager.handleInteractAsync(event.getPlayer(),new WrappedServerboundInteractPacket(event.getPacket()));
-            } else {
-                throw new IllegalStateException("Unexpected value: " + event.getPacketType());
-            }
+        if (PacketType.Play.Client.USE_ENTITY.equals(packetType)) {
+            npcManager.handleInteractAsync(event.getPlayer(), new WrappedServerboundInteractPacket(event.getPacket()));
+        } else {
+            throw new IllegalStateException("Unexpected value: " + event.getPacketType());
+        }
         //todo cancel packet
     }
 

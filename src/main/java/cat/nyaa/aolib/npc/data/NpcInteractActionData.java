@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 public record NpcInteractActionData(@Nullable actionEnum action, @Nullable handEnum hand, @Nullable Vector position) {
 
 
-     public  static NpcInteractActionData create(@NotNull WrappedEnumEntityUseAction wrappedEnumEntityUseAction) {
+    public static NpcInteractActionData create(@NotNull WrappedEnumEntityUseAction wrappedEnumEntityUseAction) {
         switch (wrappedEnumEntityUseAction.getAction()) {
             case INTERACT -> {
                 return new NpcInteractActionData(actionEnum.INTERACT, handEnum.valueOf(wrappedEnumEntityUseAction.getHand().name()), null);

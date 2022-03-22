@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class PageUI extends BaseUI {
-    private  List<IUiItem> allUiItem;
-    private  List<IUiItem> buttonItem;
-    private  Consumer<IBaseUI> updateConsumer;
     @NotNull
     private final String uiTitle;
     int page = 0;
+    private List<IUiItem> allUiItem;
+    private List<IUiItem> buttonItem;
+    private Consumer<IBaseUI> updateConsumer;
 
     public PageUI(List<IUiItem> allUiItem, List<IUiItem> buttonItem, Consumer<IBaseUI> updateConsumer, @NotNull String uiTitle) {
         this.allUiItem = allUiItem;
@@ -40,20 +40,6 @@ public class PageUI extends BaseUI {
         this.buttonItem = getAllSimpleButtonUiItem(this);
         this.updateConsumer = updateConsumer;
         this.uiTitle = uiTitle;
-    }
-
-    public void setAllUiItem(List<IUiItem> allUiItem) {
-        this.allUiItem = allUiItem;
-        updateConsumer.accept(this);
-    }
-
-    public void setButtonItem(List<IUiItem> buttonItem) {
-        this.buttonItem = buttonItem;
-        updateConsumer.accept(this);
-    }
-
-    public void setUpdateConsumer(Consumer<IBaseUI> updateConsumer) {
-        this.updateConsumer = updateConsumer;
     }
 
     public static @NotNull List<IUiItem> getAllSimpleButtonUiItem(PageUI pageUI) {
@@ -98,6 +84,20 @@ public class PageUI extends BaseUI {
                     return itemStack;
                 })
         );
+    }
+
+    public void setAllUiItem(List<IUiItem> allUiItem) {
+        this.allUiItem = allUiItem;
+        updateConsumer.accept(this);
+    }
+
+    public void setButtonItem(List<IUiItem> buttonItem) {
+        this.buttonItem = buttonItem;
+        updateConsumer.accept(this);
+    }
+
+    public void setUpdateConsumer(Consumer<IBaseUI> updateConsumer) {
+        this.updateConsumer = updateConsumer;
     }
 
     public int getPage() {

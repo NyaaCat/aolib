@@ -15,16 +15,17 @@ public class WrappedClientboundRemoveEntitiesPacket extends AbstractWrappedPacke
         super(handle, PACKET_TYPE);
     }
 
+    public WrappedClientboundRemoveEntitiesPacket(List<Integer> entityIdList) {
+        this(createPacket(entityIdList));
+    }
+
+    public WrappedClientboundRemoveEntitiesPacket(int... entityId) {
+        this(Ints.asList(entityId));
+    }
+
     private static @NotNull PacketContainer createPacket(List<Integer> entityIds) {
         PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
         packetContainer.getIntLists().write(0, entityIds);
         return packetContainer;
-    }
-
-    public WrappedClientboundRemoveEntitiesPacket(List<Integer> entityIdList) {
-        this(createPacket(entityIdList));
-    }
-    public WrappedClientboundRemoveEntitiesPacket(int... entityId) {
-        this(Ints.asList(entityId));
     }
 }

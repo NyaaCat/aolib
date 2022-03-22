@@ -92,6 +92,7 @@ public class TaskUtils {
         public static boolean callSync(@NotNull Runnable runnable) {
             return callSync(runnable, null);
         }
+
         public static boolean callSync(@NotNull Runnable runnable, @Nullable Plugin plugin) {
             if (Bukkit.isPrimaryThread()) {
                 try {

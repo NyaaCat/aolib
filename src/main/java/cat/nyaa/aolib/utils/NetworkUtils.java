@@ -15,12 +15,14 @@ public class NetworkUtils {
     }
 
     public static int rot2int(float rot) {// FOR NETWORK PACKET
-        return (int)Math.floor(rot * 256.0F / 360.0F);
+        return (int) Math.floor(rot * 256.0F / 360.0F);
     }
+
     public static byte rot2byte(float rot) {// FOR NETWORK PACKET
         return (byte) rot2int(rot);
     }
-    public static int tryToGetEntityTypeId(EntityType entityType) throws RuntimeException{
+
+    public static int tryToGetEntityTypeId(EntityType entityType) throws RuntimeException {
         Optional<Integer> typeID = EntityUtils.getEntityTypeId(entityType);
         if (typeID.isEmpty()) throw new RuntimeException("can not get type id by: " + entityType.name());
         return typeID.get();

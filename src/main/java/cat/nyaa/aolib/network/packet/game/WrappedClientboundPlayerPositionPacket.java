@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Set;
+
 //client
 public class WrappedClientboundPlayerPositionPacket extends AbstractWrappedPacket {
     public final static PacketType PACKET_TYPE = PacketType.Play.Server.POSITION;

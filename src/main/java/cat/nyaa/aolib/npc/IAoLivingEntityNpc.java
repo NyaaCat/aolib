@@ -13,7 +13,8 @@ public interface IAoLivingEntityNpc extends IAoEntityNpc {
     default AbstractWrappedPacket getAddEntityPacket() {
         return new WrappedClientboundAddMobPacket(this);
     }
-    default NpcEquipmentData getNpcEquipmentData(){
+
+    default NpcEquipmentData getNpcEquipmentData() {
         return new NpcEquipmentData();
     }
 }

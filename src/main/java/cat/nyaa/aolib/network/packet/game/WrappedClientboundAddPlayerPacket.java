@@ -1,8 +1,8 @@
 package cat.nyaa.aolib.network.packet.game;
 
-import cat.nyaa.aolib.utils.NetworkUtils;
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import cat.nyaa.aolib.npc.IAoPlayerNpc;
+import cat.nyaa.aolib.utils.NetworkUtils;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import org.jetbrains.annotations.NotNull;

@@ -42,7 +42,7 @@ public class CommandUtils {
     }
 
     public static class runCommand {
-        private static LoadingCache<String, List<String>> permissionCache = CacheBuilder
+        private static final LoadingCache<String, List<String>> permissionCache = CacheBuilder
                 .newBuilder()
                 .concurrencyLevel(1)
                 .maximumSize(1000)

@@ -24,11 +24,15 @@ import java.util.logging.Logger;
 
 public final class AoLibPlugin extends JavaPlugin {
     private static final boolean DEBUG = false;
-    private NpcManager debug_npcManager;
     @Nullable
     public static AoLibPlugin instance = null;
     private static AolibI18n I18n = null;
+    private NpcManager debug_npcManager;
     private UIManager debug_uiManager;
+
+    public static Optional<AolibI18n> getI18n() {
+        return Optional.ofNullable(I18n);
+    }
 
     @NotNull
     @Override
@@ -67,10 +71,6 @@ public final class AoLibPlugin extends JavaPlugin {
     private void debugDisable() {
         this.debug_npcManager.destructor();
         this.debug_uiManager.destructor();
-    }
-
-    public static Optional<AolibI18n> getI18n() {
-        return Optional.ofNullable(I18n);
     }
 
     @Override
