@@ -4,12 +4,12 @@ import cat.nyaa.aolib.aoui.UIManager;
 import cat.nyaa.aolib.network.packet.game.WrappedServerboundContainerButtonClickPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedServerboundContainerClickPacket;
 import cat.nyaa.aolib.network.packet.game.WrappedServerboundContainerClosePacket;
-import cat.nyaa.aolib.utils.TaskUtils;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+
+import java.util.UUID;
 
 public class UIPacketListener extends PacketAdapter {
     protected UIManager uiManager;
@@ -22,24 +22,23 @@ public class UIPacketListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         PacketType packetType = event.getPacketType();
+        UUID playerId = event.getPlayer().getUniqueId();
 
-        var cancel = TaskUtils.async.callSyncAndGet(() -> {
-            Player player = event.getPlayer();
-            if (PacketType.Play.Client.CLOSE_WINDOW.equals(packetType)) {
-                WrappedServerboundContainerClosePacket wrappedPacket = new WrappedServerboundContainerClosePacket(event.getPacket());
-                return uiManager.handleWindowClose(player, wrappedPacket);
-            } else if (PacketType.Play.Client.WINDOW_CLICK.equals(packetType)) {
-                WrappedServerboundContainerClickPacket wrappedPacket = new WrappedServerboundContainerClickPacket(event.getPacket());
-                return uiManager.handleWindowClick(player, wrappedPacket);
-            } else if (PacketType.Play.Client.ENCHANT_ITEM.equals(packetType)) {
-                WrappedServerboundContainerButtonClickPacket wrappedPacket = new WrappedServerboundContainerButtonClickPacket(event.getPacket());
-                return uiManager.handleWindowButtonClick(player, wrappedPacket);
-            } else {
-                throw new IllegalStateException("Unexpected value: " + event.getPacketType());
-            }
-        }, getPlugin());
+        boolean cancel;
+        if (PacketType.Play.Client.CLOSE_WINDOW.equals(packetType)) {
+            WrappedServerboundContainerClosePacket wrappedPacket = new WrappedServerboundContainerClosePacket(event.getPacket());
+            cancel = uiManager.handleWindowCloseAsync(playerId, wrappedPacket);
+        } else if (PacketType.Play.Client.WINDOW_CLICK.equals(packetType)) {
+            WrappedServerboundContainerClickPacket wrappedPacket = new WrappedServerboundContainerClickPacket(event.getPacket());
+            cancel = uiManager.handleWindowClickAsync(playerId, wrappedPacket);
+        } else if (PacketType.Play.Client.ENCHANT_ITEM.equals(packetType)) {
+            WrappedServerboundContainerButtonClickPacket wrappedPacket = new WrappedServerboundContainerButtonClickPacket(event.getPacket());
+            cancel = uiManager.handleWindowButtonClickAsync(playerId, wrappedPacket);
+        } else {
+            throw new IllegalStateException("Unexpected value: " + event.getPacketType());
+        }
 
-        if (cancel != null && cancel && !event.isReadOnly() && !event.isCancelled()) {
+        if (cancel && !event.isReadOnly() && !event.isCancelled()) {
             event.setCancelled(true);
         }
 

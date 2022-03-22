@@ -4,6 +4,7 @@ package cat.nyaa.aolib.aoui;
 import cat.nyaa.aolib.UISynchronizer;
 import cat.nyaa.aolib.aoui.network.UIPacketListener;
 import cat.nyaa.aolib.network.packet.game.*;
+import cat.nyaa.aolib.utils.TaskUtils;
 import com.comphenix.protocol.wrappers.ComponentConverter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,25 +14,28 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import static com.comphenix.protocol.ProtocolLibrary.getProtocolManager;
 
 public class UIManager {
-    private final Map<UUID, UIPlayerHold> playerUI = new HashMap<>();
+    private final ConcurrentHashMap<UUID, UIPlayerHold> playerUI = new ConcurrentHashMap<>();
     private final Plugin plugin;
     private final UIPacketListener packetListener;
     private final UIListener eventListener;
     private final UISynchronizer uiSynchronizer;
 
-    public UIManager(Plugin plugin) {
+    public UIManager(@NotNull Plugin plugin) {
         this.plugin = plugin;
         this.packetListener = new UIPacketListener(this.plugin, this);
         this.eventListener = new UIListener(this.plugin, this);
         this.uiSynchronizer = new UISynchronizer() {
             @Override
-            public void sendInitialData(UIPlayerHold uiPlayerHold, List<ItemStack> items, ItemStack carriedItem, int[] data) {
+            public void sendInitialData(@NotNull UIPlayerHold uiPlayerHold, @NotNull List<ItemStack> items, @NotNull ItemStack carriedItem, int[] data) {
                 try {
                     new WrappedClientboundContainerSetContentPacket(uiPlayerHold.getWindowId(), uiPlayerHold.incrementStateId(), items, carriedItem).sendServerPacket(uiPlayerHold.getPlayer());
                 } catch (InvocationTargetException e) {
@@ -45,7 +49,7 @@ public class UIManager {
             }
 
             @Override
-            public void sendSlotChange(UIPlayerHold uiPlayerHold, int slot, ItemStack itemStack) {
+            public void sendSlotChange(@NotNull UIPlayerHold uiPlayerHold, int slot, @NotNull ItemStack itemStack) {
                 try {
                     new WrappedClientboundContainerSetSlotPacket(uiPlayerHold.getWindowId(), uiPlayerHold.incrementStateId(), slot, itemStack).sendServerPacket(uiPlayerHold.getPlayer());
                 } catch (InvocationTargetException e) {
@@ -54,7 +58,7 @@ public class UIManager {
             }
 
             @Override
-            public void sendCarriedChange(UIPlayerHold uiPlayerHold, ItemStack itemStack) {
+            public void sendCarriedChange(@NotNull UIPlayerHold uiPlayerHold, @NotNull ItemStack itemStack) {
                 try {
                     new WrappedClientboundContainerSetSlotPacket(-1, uiPlayerHold.incrementStateId(), -1, itemStack).sendServerPacket(uiPlayerHold.getPlayer());
                 } catch (InvocationTargetException e) {
@@ -64,11 +68,11 @@ public class UIManager {
             }
 
             @Override
-            public void sendDataChange(UIPlayerHold uiPlayerHold, int id, int value) {
+            public void sendDataChange(@NotNull UIPlayerHold uiPlayerHold, int id, int value) {
                 broadcastDataValue(uiPlayerHold, id, value);
             }
 
-            private void broadcastDataValue(UIPlayerHold uiPlayerHold, int id, int value) {
+            private void broadcastDataValue(@NotNull UIPlayerHold uiPlayerHold, int id, int value) {
                 try {
                     new WrappedClientboundContainerSetDataPacket(uiPlayerHold.getWindowId(), id, value).sendServerPacket(uiPlayerHold.getPlayer());
                 } catch (InvocationTargetException e) {
@@ -121,7 +125,13 @@ public class UIManager {
         willBeRemoved.forEach(this::closeWindow);
     }
 
-    public void sendCloseWindow(Player player) {
+    private void sendCloseWindow(@NotNull UUID playerId) {
+        var player = Bukkit.getPlayer(playerId);
+        if (player == null) return;
+        sendCloseWindow(player);
+    }
+
+    public void sendCloseWindow(@NotNull Player player) {
         UUID playerId = player.getUniqueId();
         if (playerUI.containsKey(playerId)) {
             try {
@@ -133,7 +143,7 @@ public class UIManager {
         }
     }
 
-    public void sendOpenWindow(Player player, IBaseUI ui) {
+    public void sendOpenWindow(@NotNull Player player,@NotNull  IBaseUI ui) {
         UUID playerId = player.getUniqueId();
         if (playerUI.containsKey(playerId)) {
             sendCloseWindow(player);
@@ -158,14 +168,14 @@ public class UIManager {
 //    }
 
 
-    protected void closeWindow(UUID playerId) {
+    protected void closeWindow(@NotNull UUID playerId) {
         if (playerUI.containsKey(playerId)) {
             playerUI.get(playerId).getHoldUI().onWindowClose();
             playerUI.remove(playerId);
         }
     }
 
-    protected void openWindow(Player player, IBaseUI ui) {
+    protected void openWindow(@NotNull Player player, @NotNull IBaseUI ui) {
         UUID playerId = player.getUniqueId();
         if (playerUI.containsKey(playerId)) {
             closeWindow(playerId);
@@ -174,7 +184,7 @@ public class UIManager {
         //sendAllData
     }
 
-    protected List<Player> getPlayerListByUi(IBaseUI ui) {
+    protected List<Player> getPlayerListByUi(@NotNull IBaseUI ui) {
         List<Player> result = new ArrayList<>();
         Bukkit.getOnlinePlayers().forEach(player -> {
             UUID playerId = player.getUniqueId();
@@ -186,11 +196,11 @@ public class UIManager {
         return result;
     }
 
-    public void broadcastChanges(IBaseUI ui) {
+    public void broadcastChanges(@NotNull IBaseUI ui) {
         getPlayerListByUi(ui).forEach(this::broadcastChanges);
     }
 
-    public void broadcastFullState(IBaseUI ui) {
+    public void broadcastFullState(@NotNull IBaseUI ui) {
         getPlayerListByUi(ui).forEach(this::broadcastFullState);
     }
 
@@ -199,11 +209,11 @@ public class UIManager {
         getUiPlayerHoldToRun(player, this::broadcastChanges);
     }
 
-    public void broadcastFullState(Player player) {
+    public void broadcastFullState(@NotNull Player player) {
         getUiPlayerHoldToRun(player, this::broadcastFullState);
     }
 
-    private void getUiPlayerHoldToRun(Player player, Consumer<UIPlayerHold> consumer) {
+    private void getUiPlayerHoldToRun(@NotNull Player player,@NotNull  Consumer<UIPlayerHold> consumer) {
         UUID playerId = player.getUniqueId();
         if (!playerUI.containsKey(playerId)) return;
         UIPlayerHold uiPlayerHold = playerUI.get(playerId);
@@ -211,27 +221,35 @@ public class UIManager {
     }
 
 
-    public void broadcastChanges(UIPlayerHold uiPlayerHold) {
+    public void broadcastChanges(@NotNull UIPlayerHold uiPlayerHold) {
         uiPlayerHold.broadcastChanges();
     }
 
-    public void broadcastFullState(UIPlayerHold uiPlayerHold) {
+    public void broadcastFullState(@NotNull UIPlayerHold uiPlayerHold) {
         uiPlayerHold.broadcastFullState();
     }
 
-    public void handlePlayerQuit(Player player) {
+    public void handlePlayerQuit(@NotNull Player player) {
         closeWindow(player.getUniqueId());
         flashPlayerUIList();
     }
 
-
-    public boolean handleWindowClick(Player player, WrappedServerboundContainerClickPacket wrappedPacket) {
-        if (!Bukkit.isPrimaryThread()) return false;
-        UUID playerId = player.getUniqueId();
+    private boolean hasUiAsync(@NotNull UUID playerId,int windowId) {
         if (!playerUI.containsKey(playerId)) return false;
+        return playerUI.get(playerId).getWindowId() == windowId;
+    }
+
+
+    public boolean handleWindowClickAsync(@NotNull  UUID playerId,@NotNull  WrappedServerboundContainerClickPacket wrappedPacket) {
+        if(!hasUiAsync(playerId,wrappedPacket.getContainerId())) return false;
+        TaskUtils.async.callSync(() -> handleWindowClick(playerId, wrappedPacket));
+        return true;
+    }
+
+    private void handleWindowClick(@NotNull UUID playerId,@NotNull  WrappedServerboundContainerClickPacket wrappedPacket) {
+        var player = Bukkit.getPlayer(playerId);
+        if (player == null) return;
         UIPlayerHold uiPlayerHold = playerUI.get(playerId);
-        //plugin.getLogger().info(String.valueOf(wrappedPacket.getContainerId()));
-        if (uiPlayerHold.getWindowId() != wrappedPacket.getContainerId()) return false;
         boolean flag = wrappedPacket.getStateId() != uiPlayerHold.getStateId();
         uiPlayerHold.suppressRemoteUpdates();
 
@@ -246,27 +264,29 @@ public class UIManager {
         } else {
             uiPlayerHold.broadcastChanges();
         }
+    }
+
+
+    public boolean handleWindowButtonClickAsync( @NotNull UUID playerId, @NotNull WrappedServerboundContainerButtonClickPacket wrappedPacket) {
+        if(!hasUiAsync(playerId,wrappedPacket.getContainerId())) return false;
+        TaskUtils.async.callSync(() -> handleWindowButtonClick(playerId, wrappedPacket.getButtonId()));
         return true;
     }
 
-    public boolean handleWindowButtonClick(Player player, WrappedServerboundContainerButtonClickPacket wrappedPacket) {
-        if (!Bukkit.isPrimaryThread()) return false;
-        UUID playerId = player.getUniqueId();
-        if (!playerUI.containsKey(playerId)) return false;
-        if (playerUI.get(playerId).getWindowId() != wrappedPacket.getContainerId()) return false;
-        playerUI.get(playerId).getHoldUI().onButtonClick(wrappedPacket.getButtonId(), player);
-        return true;
+    private void handleWindowButtonClick(@NotNull UUID playerId, int buttonId) {
+        var player = Bukkit.getPlayer(playerId);
+        if (player == null) return;
+        playerUI.get(playerId).getHoldUI().onButtonClick(buttonId, player);
+
     }
 
-    public boolean handleWindowClose(Player player, WrappedServerboundContainerClosePacket wrappedPacket) {
-        if (!Bukkit.isPrimaryThread()) return false;
-        UUID playerId = player.getUniqueId();
+    public boolean handleWindowCloseAsync( @NotNull UUID playerId, @NotNull  WrappedServerboundContainerClosePacket wrappedPacket) {
         if (!playerUI.containsKey(playerId)) return false;
         if (playerUI.get(playerId).getWindowId() == wrappedPacket.getContainerId()) {
-            closeWindow(playerId);
+            TaskUtils.async.callSync(() -> closeWindow(playerId));
             return true;
         } else {
-            sendCloseWindow(player);
+            TaskUtils.async.callSync(() -> sendCloseWindow(playerId));
         }
         return false;
     }

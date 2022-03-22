@@ -12,7 +12,7 @@ public interface IBaseUI {
 
     void onWindowClose();
 
-    int getWindowId();
+    int getWindowId();//async
 
     int getTypeId();
 

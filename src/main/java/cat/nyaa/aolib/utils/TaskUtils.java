@@ -105,7 +105,7 @@ public class TaskUtils {
                 var p = plugin;
                 if (p == null) p = AoLibPlugin.instance;
                 if (p == null) return false;
-                var future = Bukkit.getScheduler().callSyncMethod(p, () -> {
+                Bukkit.getScheduler().callSyncMethod(p, () -> {
                     runnable.run();
                     return null;
                 });

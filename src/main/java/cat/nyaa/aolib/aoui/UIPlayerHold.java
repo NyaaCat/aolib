@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public class UIPlayerHold {
 
     public final static ItemStack EMPTY_ITEM = new ItemStack(Material.AIR);
-    private final IBaseUI holdUI;
+    private final IBaseUI holdUI; // async
     private final Player player;
     private final List<ItemStack> remoteSlots;
     private final List<Integer> remoteDataSlots;
@@ -174,6 +174,7 @@ public class UIPlayerHold {
     }
 
     public int getWindowId() {
+        //async
         return getHoldUI().getWindowId();
     }
 

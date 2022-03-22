@@ -212,16 +212,16 @@ public class NpcManager {
         //todo
     }
 
-    public boolean handleInteract(@NotNull Player player, WrappedServerboundInteractPacket packet) {
-
-        for (String playerHoldNpcName : npcPlayerMap.getPlayerHoldNpcNames(player.getUniqueId())) {
-            if (trackedNpcMap.containsKey(playerHoldNpcName)) {
-                if (trackedNpcMap.get(playerHoldNpcName).getAoNpc().getEntityId() == packet.getEntityId()) {
-                    trackedNpcMap.get(playerHoldNpcName).getAoNpc().onInteract(packet.getEntityId(), NpcInteractActionData.create(packet.getAction()), packet.getUsingSecondaryAction());
-                    return true;
+    public void handleInteractAsync(@NotNull Player player, WrappedServerboundInteractPacket packet) {
+        //todo
+        TaskUtils.async.callSync(() -> {
+            for (String playerHoldNpcName : npcPlayerMap.getPlayerHoldNpcNames(player.getUniqueId())) {
+                if (trackedNpcMap.containsKey(playerHoldNpcName)) {
+                    if (trackedNpcMap.get(playerHoldNpcName).getAoNpc().getEntityId() == packet.getEntityId()) {
+                        trackedNpcMap.get(playerHoldNpcName).getAoNpc().onInteract(packet.getEntityId(), NpcInteractActionData.create(packet.getAction()), packet.getUsingSecondaryAction());
+                    }
                 }
             }
-        }
-        return false;
+        });
     }
 }
