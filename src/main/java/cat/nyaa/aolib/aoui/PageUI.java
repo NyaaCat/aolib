@@ -18,12 +18,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class PageUI extends BaseUI {
     @NotNull
     private final String uiTitle;
-    int page = 0;
+    ConcurrentHashMap<UUID, Integer> pageMap = new ConcurrentHashMap<>();
     private List<IUiItem> allUiItem;
     private List<IUiItem> buttonItem;
     private Consumer<IBaseUI> updateConsumer;
@@ -51,26 +53,28 @@ public class PageUI extends BaseUI {
     }
 
     @Contract(value = "_, _ -> new", pure = true)
-    private static @NotNull CallBackUiItem getSimplePageButtonUiItem(PageUI pageUI, ButtonPageType type) {
+    public static @NotNull CallBackUiItem getSimplePageButtonUiItem(PageUI pageUI, ButtonPageType type) {
         return new CallBackUiItem(
                 ((clickType, player) -> {
+                    var playerUniqueId = player.getUniqueId();
                     if (clickType.equals(DataClickType.PICKUP)) {
                         switch (type) {
                             case NEXT -> {
-                                if (pageUI.hasNextPage()) pageUI.nextPage();
+                                if (pageUI.hasNextPage(playerUniqueId)) pageUI.nextPage(playerUniqueId);
                             }
                             case PREV -> {
-                                if (pageUI.hasPrevPage()) pageUI.prevPage();
+                                if (pageUI.hasPrevPage(playerUniqueId)) pageUI.prevPage(playerUniqueId);
                             }
                         }
                     }
                 }),
                 ((player) -> {
+                    var playerUniqueId = player.getUniqueId();
                     if (type == ButtonPageType.PREV) {
-                        if (!pageUI.hasPrevPage()) return UIPlayerHold.EMPTY_ITEM.clone();
+                        if (!pageUI.hasPrevPage(playerUniqueId)) return UIPlayerHold.EMPTY_ITEM.clone();
                     }
                     if (type == ButtonPageType.NEXT) {
-                        if (!pageUI.hasNextPage()) return UIPlayerHold.EMPTY_ITEM.clone();
+                        if (!pageUI.hasNextPage(playerUniqueId)) return UIPlayerHold.EMPTY_ITEM.clone();
                     }
                     var i18nOptional = AoLibPlugin.getI18n();
                     if (i18nOptional.isEmpty()) return new ItemStack(Material.ARROW);
@@ -100,34 +104,35 @@ public class PageUI extends BaseUI {
         this.updateConsumer = updateConsumer;
     }
 
-    public int getPage() {
-        return page;
+    public int getPage(UUID uuid) {
+        return pageMap.getOrDefault(uuid, 0);
     }
 
-    public void setPage(int page) {
+    public void setPage(UUID uuid, int page) {
         var maxPage = getMaxPage();
         if (page >= maxPage) {
-            this.page = maxPage;
-        } else this.page = Math.max(page, 0);
+            this.pageMap.put(uuid, maxPage);
+
+        } else this.pageMap.put(uuid, Math.max(page, 0));
         updateConsumer.accept(this);
     }
 
     @Contract(pure = true)
-    public boolean hasNextPage() {
-        return page < getMaxPage();
+    public boolean hasNextPage(UUID uuid) {
+        return getPage(uuid) < getMaxPage();
     }
 
-    public void nextPage() {
-        setPage(getPage() + 1);
+    public void nextPage(UUID uuid) {
+        setPage(uuid, getPage(uuid) + 1);
     }
 
     @Contract(pure = true)
-    public boolean hasPrevPage() {
-        return page > 0;
+    public boolean hasPrevPage(UUID uuid) {
+        return getPage(uuid) > 0;
     }
 
-    public void prevPage() {
-        setPage(getPage() - 1);
+    public void prevPage(UUID uuid) {
+        setPage(uuid,getPage(uuid) - 1);
     }
 
     @Contract(pure = true)
@@ -140,10 +145,11 @@ public class PageUI extends BaseUI {
         return new TextComponent(this.uiTitle);
     }
 
-    private @NotNull List<IUiItem> getPageUiItem() {
+    private @NotNull List<IUiItem> getPageUiItem(Player player) {
         List<IUiItem> result = new ArrayList<>();
-        int start = (page) * (5 * 9);
-        int end = (page + 1) * (5 * 9);
+        var playerId = player.getUniqueId();
+        int start = (getPage(playerId)) * (5 * 9);
+        int end = (getPage(playerId) + 1) * (5 * 9);
         for (int i = start; i < end; i++) {
             if (i < allUiItem.size()) {
                 result.add(allUiItem.get(i));
@@ -163,12 +169,12 @@ public class PageUI extends BaseUI {
 
     @Override
     public @NotNull List<ItemStack> getWindowItem(Player player) {
-        return getPageUiItemAll().stream().map(iUiItem -> iUiItem.getWindowItem(player)).toList();
+        return getPageUiItemAll(player).stream().map(iUiItem -> iUiItem.getWindowItem(player)).toList();
     }
 
-    List<IUiItem> getPageUiItemAll() {
+    List<IUiItem> getPageUiItemAll(Player player) {
         List<IUiItem> result = Lists.newArrayList();
-        var pageUiItem = getPageUiItem();
+        var pageUiItem = getPageUiItem(player);
         for (int i = 0; i < uiItemList.size(); i++) {
             if (i < pageUiItem.size()) {
                 result.add(pageUiItem.get(i));
@@ -181,7 +187,7 @@ public class PageUI extends BaseUI {
 
     @Override
     public void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player) {
-        var pageItemAll = getPageUiItemAll();
+        var pageItemAll = getPageUiItemAll(player);
         if (slotNum < pageItemAll.size() && slotNum >= 0) {
             var uiItem = pageItemAll.get(slotNum);
             if (uiItem instanceof IClickableUiItem) {
