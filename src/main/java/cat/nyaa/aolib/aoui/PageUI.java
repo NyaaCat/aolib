@@ -44,6 +44,14 @@ public class PageUI extends BaseUI {
         this.uiTitle = uiTitle;
     }
 
+    @Override
+    public void onWindowOpen(@NotNull Player player) {
+        super.onWindowOpen(player);
+        if (this.getPage(player.getUniqueId()) != 0) {
+            this.setPage(player.getUniqueId(), 0);
+        }
+    }
+
     public static @NotNull List<IUiItem> getAllSimpleButtonUiItem(PageUI pageUI) {
         var uiItemArray = new IUiItem[9];
         Arrays.fill(uiItemArray, EmptyUIItem.EMPTY_UI_ITEM);
@@ -108,12 +116,15 @@ public class PageUI extends BaseUI {
         return pageMap.getOrDefault(uuid, 0);
     }
 
-    public void setPage(UUID uuid, int page) {
+    private void setPageNotUpdate(UUID uuid, int page) {
         var maxPage = getMaxPage();
         if (page >= maxPage) {
             this.pageMap.put(uuid, maxPage);
 
         } else this.pageMap.put(uuid, Math.max(page, 0));
+    }
+    public void setPage(UUID uuid, int page) {
+        setPageNotUpdate(uuid, page);
         updateConsumer.accept(this);
     }
 
@@ -132,7 +143,7 @@ public class PageUI extends BaseUI {
     }
 
     public void prevPage(UUID uuid) {
-        setPage(uuid,getPage(uuid) - 1);
+        setPage(uuid, getPage(uuid) - 1);
     }
 
     @Contract(pure = true)

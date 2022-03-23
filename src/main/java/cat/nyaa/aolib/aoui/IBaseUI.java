@@ -9,8 +9,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface IBaseUI {
+    default void onWindowOpen(@NotNull Player player) {
+    }
 
-    void onWindowClose();
+    default void onWindowClose() {
+    }
+
+    default void onButtonClick(int buttonId, Player player) {
+    }
+
+    default void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player) {
+    }
 
     int getWindowId();//async
 
@@ -29,9 +38,6 @@ public interface IBaseUI {
 
     int[] getWindowData(Player player);
 
-    void onButtonClick(int buttonId, Player player);
-
-    void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player);
-
     int getDataSize();
+
 }

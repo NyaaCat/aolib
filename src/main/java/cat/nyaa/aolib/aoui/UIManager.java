@@ -86,6 +86,10 @@ public class UIManager {
         getProtocolManager().addPacketListener(packetListener);
     }
 
+    public Plugin getPlugin() {
+        return plugin;
+    }
+
     public void destructor() {
         try {
             flashPlayerUIList();
@@ -148,12 +152,12 @@ public class UIManager {
         if (playerUI.containsKey(playerId)) {
             sendCloseWindow(player);
         }
+        openWindow(player, ui);
         try {
             new WrappedClientboundOpenScreenPacket(ui.getWindowId(), ui.getTypeId(), ComponentConverter.fromBaseComponent(ui.getTitle())).sendServerPacket(player);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-        openWindow(player, ui);
     }
 
 //    public boolean sendAllData(Player player) {
@@ -181,7 +185,7 @@ public class UIManager {
             closeWindow(playerId);
         }
         playerUI.put(playerId, new UIPlayerHold(ui, player, this.uiSynchronizer));
-        //sendAllData
+        ui.onWindowOpen(player);
     }
 
     protected List<Player> getPlayerListByUi(@NotNull IBaseUI ui) {
