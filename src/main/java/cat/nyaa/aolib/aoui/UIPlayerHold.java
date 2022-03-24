@@ -87,7 +87,7 @@ public class UIPlayerHold {
             this.remoteSlots.set(i, slots.get(i).clone());
         }
 
-        this.remoteCarried = this.getHoldUI().getCarriedWindowItem().clone();
+        this.remoteCarried = this.getHoldUI().getCarriedWindowItem(getPlayer()).clone();
 
 
         int[] data = getWindowData();
@@ -141,8 +141,9 @@ public class UIPlayerHold {
 
     private void synchronizeCarriedToRemote() {
         if (!this.suppressRemoteUpdates) {
-            if (!this.remoteCarried.equals(this.getHoldUI().getCarriedWindowItem())) {
-                this.remoteCarried = this.getHoldUI().getCarriedWindowItem().clone();
+            var carriedWindowItem = this.getHoldUI().getCarriedWindowItem(getPlayer());
+            if (!this.remoteCarried.equals(carriedWindowItem)) {
+                this.remoteCarried = carriedWindowItem.clone();
                 if (this.uiSynchronizer != null) {
                     this.uiSynchronizer.sendCarriedChange(this, this.remoteCarried);
                 }

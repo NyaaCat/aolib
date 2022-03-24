@@ -152,12 +152,17 @@ public class UIManager {
         if (playerUI.containsKey(playerId)) {
             sendCloseWindow(player);
         }
-        openWindow(player, ui);
         try {
-            new WrappedClientboundOpenScreenPacket(ui.getWindowId(), ui.getTypeId(), ComponentConverter.fromBaseComponent(ui.getTitle())).sendServerPacket(player);
+            new WrappedClientboundOpenScreenPacket(ui.getWindowId(), ui.getTypeId(), ComponentConverter.fromBaseComponent(ui.getTitle(player))).sendServerPacket(player);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+
+        if (playerUI.containsKey(playerId)) {
+            closeWindow(playerId);
+        }
+        playerUI.put(playerId, new UIPlayerHold(ui, player, this.uiSynchronizer));
+        ui.onWindowOpen(player);
     }
 
 //    public boolean sendAllData(Player player) {
@@ -177,15 +182,6 @@ public class UIManager {
             playerUI.get(playerId).getHoldUI().onWindowClose();
             playerUI.remove(playerId);
         }
-    }
-
-    protected void openWindow(@NotNull Player player, @NotNull IBaseUI ui) {
-        UUID playerId = player.getUniqueId();
-        if (playerUI.containsKey(playerId)) {
-            closeWindow(playerId);
-        }
-        playerUI.put(playerId, new UIPlayerHold(ui, player, this.uiSynchronizer));
-        ui.onWindowOpen(player);
     }
 
     protected List<Player> getPlayerListByUi(@NotNull IBaseUI ui) {

@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 public class PageUI extends BaseUI {
     @NotNull
-    private final String uiTitle;
+    protected String uiTitle;
     ConcurrentHashMap<UUID, Integer> pageMap = new ConcurrentHashMap<>();
     private List<IUiItem> allUiItem;
     private List<IUiItem> buttonItem;
@@ -152,7 +152,7 @@ public class PageUI extends BaseUI {
     }
 
     @Override
-    public @NotNull BaseComponent getTitle() {
+    public @NotNull BaseComponent getTitle(Player player) {
         return new TextComponent(this.uiTitle);
     }
 

@@ -58,7 +58,7 @@ public class BaseUI implements IBaseUI {
     }//GENERIC_9x6
 
     @Override
-    public @NotNull BaseComponent getTitle() {
+    public @NotNull BaseComponent getTitle(Player player) {
         return new TextComponent("");
     }
 
@@ -68,7 +68,7 @@ public class BaseUI implements IBaseUI {
     }
 
     @Override
-    public @NotNull ItemStack getCarriedWindowItem() {
+    public @NotNull ItemStack getCarriedWindowItem(Player player) {
         return new ItemStack(Material.AIR);
     }
 

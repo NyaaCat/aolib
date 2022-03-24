@@ -9,9 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface IBaseUI {
+    //after openWindow
     default void onWindowOpen(@NotNull Player player) {
     }
-
+    //before remove
     default void onWindowClose() {
     }
 
@@ -26,13 +27,13 @@ public interface IBaseUI {
     int getTypeId();
 
     @NotNull
-    BaseComponent getTitle();
+    BaseComponent getTitle(Player player);
 
     @NotNull
     List<ItemStack> getWindowItem(Player player);
 
     @NotNull
-    ItemStack getCarriedWindowItem();
+    ItemStack getCarriedWindowItem(Player player);
 
     int getSlotSize();
 
