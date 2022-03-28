@@ -1,6 +1,7 @@
 package cat.nyaa.aolib.aoui;
 
 import cat.nyaa.aolib.AoLibPlugin;
+import cat.nyaa.aolib.aoui.data.WindowClickData;
 import cat.nyaa.aolib.aoui.item.CallBackUiItem;
 import cat.nyaa.aolib.aoui.item.EmptyUIItem;
 import cat.nyaa.aolib.aoui.item.IClickableUiItem;
@@ -62,19 +63,18 @@ public class PageUI extends BaseUI {
 
     @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull CallBackUiItem getSimplePageButtonUiItem(PageUI pageUI, ButtonPageType type) {
-        return new CallBackUiItem(
-                ((clickType, player) -> {
-                    var playerUniqueId = player.getUniqueId();
-                    if (clickType.equals(DataClickType.PICKUP)) {
-                        switch (type) {
-                            case NEXT -> {
-                                if (pageUI.hasNextPage(playerUniqueId)) pageUI.nextPage(playerUniqueId);
-                            }
-                            case PREV -> {
-                                if (pageUI.hasPrevPage(playerUniqueId)) pageUI.prevPage(playerUniqueId);
-                            }
-                        }
+        return new CallBackUiItem(((clickData, player) -> {
+            var playerUniqueId = player.getUniqueId();
+            if (clickData.clickType().equals(DataClickType.PICKUP)) {
+                switch (type) {
+                    case NEXT -> {
+                        if (pageUI.hasNextPage(playerUniqueId)) pageUI.nextPage(playerUniqueId);
                     }
+                    case PREV -> {
+                        if (pageUI.hasPrevPage(playerUniqueId)) pageUI.prevPage(playerUniqueId);
+                    }
+                }
+            }
                 }),
                 ((player) -> {
                     var playerUniqueId = player.getUniqueId();
@@ -123,6 +123,7 @@ public class PageUI extends BaseUI {
 
         } else this.pageMap.put(uuid, Math.max(page, 0));
     }
+
     public void setPage(UUID uuid, int page) {
         setPageNotUpdate(uuid, page);
         updateConsumer.accept(this);
@@ -197,12 +198,13 @@ public class PageUI extends BaseUI {
     }
 
     @Override
-    public void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player) {
+    public void onWindowClick(WindowClickData windowClickData, Player player) {
         var pageItemAll = getPageUiItemAll(player);
+        var slotNum = windowClickData.slotNum();
         if (slotNum < pageItemAll.size() && slotNum >= 0) {
             var uiItem = pageItemAll.get(slotNum);
             if (uiItem instanceof IClickableUiItem) {
-                ((IClickableUiItem) uiItem).onClick(slotNum, buttonNum, clickType, player);
+                ((IClickableUiItem) uiItem).onClick(windowClickData, player);
             }
         }
     }

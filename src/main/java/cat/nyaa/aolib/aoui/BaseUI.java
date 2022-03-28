@@ -3,7 +3,6 @@ package cat.nyaa.aolib.aoui;
 import cat.nyaa.aolib.aoui.item.EmptyUIItem;
 import cat.nyaa.aolib.aoui.item.IUiItem;
 import cat.nyaa.aolib.aoui.item.PlayerInventoryItem;
-import cat.nyaa.aolib.network.data.DataClickType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
@@ -43,11 +42,6 @@ public class BaseUI implements IBaseUI {
     }
 
     @Override
-    public void onWindowClose() {
-
-    }
-
-    @Override
     public int getWindowId() {
         return WINDOW_ID;
     }
@@ -75,15 +69,6 @@ public class BaseUI implements IBaseUI {
     @Override
     public int getSlotSize() {
         return 6 * 9 + 3 * 9 + 9;//GENERIC_9x6
-    }
-
-    @Override
-    public void onButtonClick(int buttonId, Player player) {
-    }
-
-    @Override
-    public void onWindowClick(int slotNum, int buttonNum, DataClickType clickType, Player player) {
-        player.sendMessage(slotNum + ":" + clickType.name());
     }
 
     @Override

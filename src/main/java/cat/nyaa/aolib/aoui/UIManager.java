@@ -2,6 +2,7 @@ package cat.nyaa.aolib.aoui;
 
 
 import cat.nyaa.aolib.UISynchronizer;
+import cat.nyaa.aolib.aoui.data.WindowClickData;
 import cat.nyaa.aolib.aoui.network.UIPacketListener;
 import cat.nyaa.aolib.network.packet.game.*;
 import cat.nyaa.aolib.utils.TaskUtils;
@@ -249,15 +250,15 @@ public class UIManager {
     private void handleWindowClick(@NotNull UUID playerId, @NotNull WrappedServerboundContainerClickPacket wrappedPacket) {
         var player = Bukkit.getPlayer(playerId);
         if (player == null) return;
+        var windowClickData = new WindowClickData(wrappedPacket);
         UIPlayerHold uiPlayerHold = playerUI.get(playerId);
-        boolean flag = wrappedPacket.getStateId() != uiPlayerHold.getStateId();
+        boolean flag = windowClickData.stateId() != uiPlayerHold.getStateId();
         uiPlayerHold.suppressRemoteUpdates();
+        var carriedItem = windowClickData.carriedItem();
+        uiPlayerHold.getHoldUI().onWindowClick(windowClickData, player);
 
-        uiPlayerHold.getHoldUI().onWindowClick(wrappedPacket.getSlotNum(), wrappedPacket.getButtonNum(), wrappedPacket.getClickType(), player);
-
-        wrappedPacket.getChangedSlots().forEach(uiPlayerHold::setRemoteSlotNoCopy);
-
-        uiPlayerHold.setRemoteCarried(wrappedPacket.getCarriedItem());
+        windowClickData.changedSlots().forEach(uiPlayerHold::setRemoteSlotNoCopy);
+        uiPlayerHold.setRemoteCarried(carriedItem);
         uiPlayerHold.resumeRemoteUpdates();
         if (flag) {
             uiPlayerHold.broadcastFullState();

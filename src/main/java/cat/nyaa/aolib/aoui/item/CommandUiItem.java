@@ -2,6 +2,7 @@ package cat.nyaa.aolib.aoui.item;
 
 import cat.nyaa.aolib.AoLibPlugin;
 import cat.nyaa.aolib.aoui.UIManager;
+import cat.nyaa.aolib.aoui.data.WindowClickData;
 import cat.nyaa.aolib.network.data.DataClickType;
 import cat.nyaa.aolib.utils.CommandUtils;
 import org.bukkit.entity.Player;
@@ -41,18 +42,18 @@ public class CommandUiItem implements IClickableUiItem, IUiItem {
     }
 
     @Override
-    public void onClick(DataClickType clickType, Player player) {
-        if (clickType.equals(DataClickType.PICKUP)) {
+    public ItemStack getWindowItem(Player player) {
+        return holdItem;
+    }
+
+    @Override
+    public void onClick(@NotNull WindowClickData clickData, Player player) {
+        if (clickData.clickType().equals(DataClickType.PICKUP) && clickData.carriedItem().equals(holdItem)) {
             if (command.isEmpty()) return;
             CommandUtils.runCommand.executeCommand(sender == null ? player : sender, command, commandPermission, plugin);
             if (uiManager != null) {
                 uiManager.sendCloseWindow(player);
             }
         }
-    }
-
-    @Override
-    public ItemStack getWindowItem(Player player) {
-        return holdItem;
     }
 }
