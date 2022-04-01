@@ -63,18 +63,19 @@ public class PageUI extends BaseUI {
 
     @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull CallBackUiItem getSimplePageButtonUiItem(PageUI pageUI, ButtonPageType type) {
-        return new CallBackUiItem(((clickData, player) -> {
-            var playerUniqueId = player.getUniqueId();
-            if (clickData.clickType().equals(DataClickType.PICKUP)) {
-                switch (type) {
-                    case NEXT -> {
-                        if (pageUI.hasNextPage(playerUniqueId)) pageUI.nextPage(playerUniqueId);
+        return new CallBackUiItem((
+                (clickData, player) -> {
+                    var playerUniqueId = player.getUniqueId();
+                    if (clickData.clickType().equals(DataClickType.PICKUP)) {
+                        switch (type) {
+                            case NEXT -> {
+                                if (pageUI.hasNextPage(playerUniqueId)) pageUI.nextPage(playerUniqueId);
+                            }
+                            case PREV -> {
+                                if (pageUI.hasPrevPage(playerUniqueId)) pageUI.prevPage(playerUniqueId);
+                            }
+                        }
                     }
-                    case PREV -> {
-                        if (pageUI.hasPrevPage(playerUniqueId)) pageUI.prevPage(playerUniqueId);
-                    }
-                }
-            }
                 }),
                 ((player) -> {
                     var playerUniqueId = player.getUniqueId();
@@ -198,7 +199,7 @@ public class PageUI extends BaseUI {
     }
 
     @Override
-    public void onWindowClick(WindowClickData windowClickData, Player player) {
+    public void onWindowClick(@NotNull WindowClickData windowClickData, Player player) {
         var pageItemAll = getPageUiItemAll(player);
         var slotNum = windowClickData.slotNum();
         if (slotNum < pageItemAll.size() && slotNum >= 0) {
