@@ -1,0 +1,1 @@
+SELECT * FROM ao_msg WHERE player=?;

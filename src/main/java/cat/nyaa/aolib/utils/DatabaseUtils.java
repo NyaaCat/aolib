@@ -19,34 +19,37 @@ import java.util.function.Supplier;
 
 
 public class DatabaseUtils {
-    public static Optional<Connection> newSqliteJdbcConnection(@NotNull File file) {
-        Connection result = null;
-        try {
-            result = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
-            result.setAutoCommit(true);
-            return Optional.of(result);
-        } catch (SQLException throwables) {
-            if (result != null) {
-                try {
-                    result.close();
-                } catch (SQLException ignored) {
+    @Contract("_ -> new")
+    public static @NotNull CompletableFuture<Optional<Connection>> newSqliteJdbcConnection(@NotNull File file) {
+        return CompletableFuture.supplyAsync(() -> {
+            Connection result = null;
+            try {
+                result = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+                result.setAutoCommit(true);
+                return Optional.of(result);
+            } catch (SQLException throwables) {
+                if (result != null) {
+                    try {
+                        result.close();
+                    } catch (SQLException ignored) {
+                    }
                 }
+                throwables.printStackTrace();
             }
-            throwables.printStackTrace();
-        }
-        return Optional.empty();
+            return Optional.empty();
+        });
     }
 
-    public static Optional<Connection> newSqliteJdbcConnection(@NotNull File dataFolder, @NotNull String fileName) {
+    public static @NotNull CompletableFuture<Optional<Connection>> newSqliteJdbcConnection(@NotNull File dataFolder, @NotNull String fileName) {
         File f = new File(dataFolder, fileName);
         return newSqliteJdbcConnection(f);
     }
 
-    public static Optional<Connection> newSqliteJdbcConnection(@NotNull Plugin plugin, String fileName) {
+    public static @NotNull CompletableFuture<Optional<Connection>> newSqliteJdbcConnection(@NotNull Plugin plugin, String fileName) {
         return newSqliteJdbcConnection(plugin.getDataFolder(), fileName);
     }
 
-    public static Optional<Connection> newSqliteJdbcConnection(@NotNull Plugin plugin) {
+    public static @NotNull CompletableFuture<Optional<Connection>> newSqliteJdbcConnection(@NotNull Plugin plugin) {
         return newSqliteJdbcConnection(plugin, "SQLiteDatabase.db");
     }
 
@@ -129,7 +132,7 @@ public class DatabaseUtils {
      * @param parameters parameters
      * @return future
      */
-    public static @NotNull CompletableFuture<Optional< Integer>> executeUpdateAsync(Connection connection, Plugin plugin, String filename, Executor executor, Object... parameters) {
+    public static @NotNull CompletableFuture<Optional<Integer>> executeUpdateAsync(Connection connection, Plugin plugin, String filename, Executor executor, Object... parameters) {
         return executeUpdateAsync(() -> buildStatement(connection, plugin, filename, null, parameters), executor);
     }
 
@@ -196,4 +199,5 @@ public class DatabaseUtils {
             }
         }, executor);
     }
+
 }

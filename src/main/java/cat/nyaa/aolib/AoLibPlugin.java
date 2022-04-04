@@ -5,6 +5,7 @@ import cat.nyaa.aolib.aoui.PageUI;
 import cat.nyaa.aolib.aoui.UIManager;
 import cat.nyaa.aolib.aoui.item.CommandUiItem;
 import cat.nyaa.aolib.aoui.item.IUiItem;
+import cat.nyaa.aolib.message.AoMessage;
 import cat.nyaa.aolib.npc.NpcManager;
 import cat.nyaa.aolib.utils.EntityDataUtils;
 import cat.nyaa.nyaacore.LanguageRepository;
@@ -29,6 +30,7 @@ public final class AoLibPlugin extends JavaPlugin {
     private static AolibI18n I18n = null;
     private NpcManager debug_npcManager;
     private UIManager debug_uiManager;
+    private AoMessage AoMsg;
 
     public static Optional<AolibI18n> getI18n() {
         return Optional.ofNullable(I18n);
@@ -51,6 +53,7 @@ public final class AoLibPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        this.AoMsg = new AoMessage(this);
         if (DEBUG) this.debugEnable();
     }
 
@@ -65,6 +68,11 @@ public final class AoLibPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (AoMsg != null) {
+            AoMsg.destructor();
+            AoMsg = null;
+        }
+
         if (DEBUG) this.debugDisable();
     }
 

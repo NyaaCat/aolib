@@ -1,0 +1,1 @@
+INSERT INTO ao_msg (msg,msg_type,player,created_at) VALUES (?,?,?,?);
