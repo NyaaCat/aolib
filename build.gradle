@@ -11,32 +11,43 @@ def buildNumber = System.getenv('BUILD_NUMBER') == null ? "x" : System.getenv('B
 def mavenDirectory = System.getenv('MAVEN_DIR') == null ? "$projectDir/repo" : System.getenv('MAVEN_DIR')
 def jdDirectory = System.getenv('JAVADOCS_DIR') == null ? null : System.getenv('JAVADOCS_DIR')
 
+String deobfedJar = DownloadFile(System.env.NMS_JAR, mavenDirectory,
+        "spigot-${minecraftVer}-latest-deobfed.jar",
+        "https://ci.nyaacat.com/maven/spigot-${minecraftVer}-latest-deobfed.jar")
+
 version = '1.0' + "." + buildNumber
 
 repositories {
     mavenCentral()
+    maven { name 'Bugjang'; url 'https://libraries.minecraft.net' }
     maven { url = "https://repo.dmulloy2.net/repository/public/" }
     maven { name = 'spigotmc-repo'; url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url = 'https://oss.sonatype.org/content/repositories/central' }
     maven { name = 'sonatype'; url = 'https://oss.sonatype.org/content/groups/public/' }
     maven { name = 'NyaaCat'; url = 'https://ci.nyaacat.com/maven/' }
+    //mavenLocal()
 }
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:$minecraftVer-R0.1-SNAPSHOT"
     compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0"
     // other nyaa plugins
-    if (gradle.hasProperty("useLocalDependencies") && gradle.useLocalDependencies) {
-        compileOnly project(":NyaaCore")
-    } else {
-        compileOnly('cat.nyaa:nyaacore:9.0-SNAPSHOT')
-    }
+    compileOnly('cat.nyaa:nyaacore:9.0-SNAPSHOT')
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 
-    compileOnly 'org.jetbrains:annotations:22.0.0'
-   // compileOnly 'it.unimi.dsi:fastutil:8.5.6'
-    testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.2')
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.8.2')
+    //plugin
+    testImplementation('cat.nyaa:nyaacore:9.0-SNAPSHOT')
+    testImplementation group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0"
+    //spigot
+    testImplementation files(deobfedJar)
+    //testImplementation "org.spigotmc:spigot:$minecraftVer-R0.1-SNAPSHOT"
+
+    testImplementation 'org.xerial:sqlite-jdbc:3.36.0.3'
+    testImplementation 'com.github.seeseemelk:MockBukkit-v1.18:1.24.1'
+    testImplementation "org.spigotmc:spigot:$minecraftVer-R0.1-SNAPSHOT"
+    testImplementation(platform('org.junit:junit-bom:5.8.2'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
 }
 
 java {
@@ -109,4 +120,34 @@ publishing {
             url mavenDirectory
         }
     }
+}
+
+String DownloadFile(String manual_override, String mavenDirectory, String filename, String url) {
+    String ret = ""
+    if (manual_override != null) {
+        ret = manual_override
+        if (new File(ret).exists()) {
+            logger.warn("Manually selected: ${ret}")
+            return ret
+        } else {
+            throw new GradleException("File not found: ${ret}")
+        }
+    }
+
+    // ci environment
+    if (new File("${mavenDirectory}/${filename}").exists()) {
+        return "${mavenDirectory}/${filename}"
+    }
+
+    // check local dir (dev environment)
+    ret = "${projectDir}/../nms_binaries/${filename}"
+    if (!(new File(ret).exists())) {
+        // nms not found, download from nyaaci
+        def f = new File(ret)
+        println "Downloading ${filename}"
+        f.getParentFile().mkdirs()
+        new URL(url).withInputStream { i -> f.withOutputStream { it << i } }
+    }
+    println("Found file: ${filename} => ${ret}")
+    return ret
 }

@@ -24,6 +24,10 @@ public class DatabaseUtils {
         return CompletableFuture.supplyAsync(() -> {
             Connection result = null;
             try {
+                Class.forName("org.sqlite.JDBC");
+            } catch (ClassNotFoundException ignored) {
+            }
+            try {
                 result = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
                 result.setAutoCommit(true);
                 return Optional.of(result);

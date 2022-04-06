@@ -51,7 +51,7 @@ public class DBFunctionUtils {
             try {
                 while (rs.next()) {
                     @SuppressWarnings("unchecked")
-                    var data = (T) finalMethodHandle.invokeExact(rs);
+                    var data = (T) finalMethodHandle.invoke(rs);
                     list.add(data);
                 }
             } catch (Throwable e) {
@@ -68,7 +68,7 @@ public class DBFunctionUtils {
             try {
                 if (rs.next()) {
                     @SuppressWarnings("unchecked")
-                    var result = (T) finalMethodHandle.invokeExact(rs);
+                    var result = (T) finalMethodHandle.invoke(rs);
                     return result;
                 }
             } catch (Throwable e) {

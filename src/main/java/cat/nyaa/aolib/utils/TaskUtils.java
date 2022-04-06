@@ -2,13 +2,12 @@ package cat.nyaa.aolib.utils;
 
 import cat.nyaa.aolib.AoLibPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 public class TaskUtils {
     public static class tickScheduler {
@@ -59,59 +58,92 @@ public class TaskUtils {
     }
 
     public static class async {
-        public static <T> T callSyncAndGet(@NotNull Callable<T> callable) {
-            return callSyncAndGet(callable, null);
+        public static Executor mainThreadExecutor = new MainThreadExecutor();
+
+        public static void onTick() {
+            while (!MainThreadExecutor.isEmpty()) {
+                var runnable = MainThreadExecutor.poll();
+                try {
+                    runnable.run();
+                } catch (Exception e) {
+                    if (AoLibPlugin.instance != null) {
+                        AoLibPlugin.instance.getLogger().warning("Exception in main thread executor");
+                    }
+                    e.printStackTrace();
+                }
+            }
         }
 
-        @Nullable
-        public static <T> T callSyncAndGet(@NotNull Callable<T> callable, @Nullable Plugin plugin) {
+        public static <T> Optional<T> getSync(@NotNull Supplier<T> supplier) {
+            var resultOptional = callSync(supplier);
+            if (resultOptional.isPresent()) {
+                try {
+                    return Optional.ofNullable(resultOptional.get().get());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+            return Optional.empty();
+        }
+
+        public static <T> Optional<CompletableFuture<T>> callSync(@NotNull Supplier<T> supplier) {
             if (Bukkit.isPrimaryThread()) {
                 try {
-                    return callable.call();
+                    return Optional.of(CompletableFuture.completedFuture(supplier.get()));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return null;
+                    return Optional.empty();
                 }
             } else {
-                var p = plugin;
-                if (p == null) p = AoLibPlugin.instance;
-                if (p == null) return null;
                 try {
-                    var future = Bukkit.getScheduler().callSyncMethod(p, callable);
-                    return future.get();
+                    return Optional.of(runSyncMethod(supplier));
                 } catch (CancellationException cancellationException) {
-                    p.getLogger().warning("Task cancelled");
-                    return null;
+                    if (AoLibPlugin.instance != null) {
+                        AoLibPlugin.instance.getLogger().warning("Task cancelled");
+                    }
+                    return Optional.empty();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return null;
+                    return Optional.empty();
                 }
             }
         }
 
-        public static boolean callSync(@NotNull Runnable runnable) {
-            return callSync(runnable, null);
-        }
-
-        public static boolean callSync(@NotNull Runnable runnable, @Nullable Plugin plugin) {
+        public static @NotNull CompletableFuture<Void> callSync(@NotNull Runnable runnable) {
             if (Bukkit.isPrimaryThread()) {
-                try {
-                    runnable.run();
-                    return true;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
+                runnable.run();
+                return CompletableFuture.completedFuture(null);
             } else {
-                var p = plugin;
-                if (p == null) p = AoLibPlugin.instance;
-                if (p == null) return false;
-                Bukkit.getScheduler().callSyncMethod(p, () -> {
-                    runnable.run();
-                    return null;
-                });
-                return true;
+                return runSyncMethod(runnable);
+            }
+
+        }
+
+        public static <T> @NotNull CompletableFuture<T> runSyncMethod(@NotNull Supplier<T> task) {
+            return CompletableFuture.supplyAsync(task, mainThreadExecutor);
+        }
+
+        public static @NotNull CompletableFuture<Void> runSyncMethod(@NotNull Runnable task) {
+            return CompletableFuture.runAsync(task, mainThreadExecutor);
+        }
+
+        private static class MainThreadExecutor implements Executor {
+            public static ConcurrentLinkedQueue<Runnable> taskQueue = new ConcurrentLinkedQueue<>();
+
+            public static boolean isEmpty() {
+                return taskQueue.isEmpty();
+            }
+
+            public static Runnable poll() {
+                return taskQueue.poll();
+            }
+
+            @Override
+            public void execute(@NotNull Runnable command) {
+                taskQueue.offer(command);
             }
         }
+
+
     }
 }

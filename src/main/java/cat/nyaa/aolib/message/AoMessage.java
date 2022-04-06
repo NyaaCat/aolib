@@ -14,6 +14,7 @@ import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
@@ -40,11 +41,14 @@ public class AoMessage {
     private Connection jdbcConnection;
 
     public AoMessage(AoLibPlugin plugin) {
+        if (instance != null) {
+            throw new IllegalStateException("AoMessage already exists");
+        }
         this.plugin = plugin;
         initDB();
         this.simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd DD HH:mm:ss.SSS (z)");
-        instance = this;
         this.listener = new MessageListener(plugin);
+        instance = this;
     }
 
     public static @Nullable AoMessage getInstance() {
@@ -60,9 +64,10 @@ public class AoMessage {
             }
         }
         HandlerList.unregisterAll(listener);
+        instance = null;
     }
 
-    private void sendMessageTo(UUID playerId, String... messages) {
+    public void sendMessageTo(UUID playerId, String... messages) {
         var player = Bukkit.getPlayer(playerId);
         if (player == null || !player.isOnline()) {
             for (String message : messages) {
@@ -73,7 +78,7 @@ public class AoMessage {
         }
     }
 
-    private void sendMessageTo(UUID playerId, BaseComponent... messages) {
+    public void sendMessageTo(UUID playerId, BaseComponent... messages) {
         var player = Bukkit.getPlayer(playerId);
         if (player == null || !player.isOnline()) {
             this.newOfflineMessage(playerId, JSON, ComponentSerializer.toString(messages));
@@ -128,14 +133,26 @@ public class AoMessage {
         return deleteOfflineMessage(Ints.asList(id));
     }
 
-    private CompletableFuture<Optional<int[]>> deleteOfflineMessage(List<Integer> id) {
+    private CompletableFuture<Optional<int[]>> deleteOfflineMessage(@NotNull List<Integer> id) {
+        if (id.isEmpty()) return CompletableFuture.completedFuture(Optional.empty());
         Optional<CompletableFuture<Optional<int[]>>> result = getConnection((conn) -> CompletableFuture.supplyAsync(() -> {
             try (var ps = conn.prepareStatement("DELETE FROM ao_msg WHERE msg_id=?;")) {
+
+                var autoCommit = conn.getAutoCommit();
+                if (autoCommit) {
+                    conn.setAutoCommit(false);
+                }
+                ////////////////////////////////////////////////////////////////////////////////////////////////
                 for (int i : id) {
                     ps.setInt(1, i);
                     ps.addBatch();
                 }
-                return Optional.of(ps.executeBatch());
+                var data = Optional.of(ps.executeBatch());
+                ////////////////////////////////////////////////////////////////////////////////////////////////
+                conn.commit();
+                if (autoCommit) conn.setAutoCommit(autoCommit);
+
+                return data;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -149,25 +166,38 @@ public class AoMessage {
 
     }
 
-    private boolean sendMessageData(AoMessageData messageData) {//async
-        return TaskUtils.async.callSyncAndGet(() -> {
-            Player player = Bukkit.getPlayer(messageData.player());
-            if (player == null || !player.isOnline()) return false;
-            var pre = TextComponent.fromLegacyText("[" + simpleDateFormat.format(new Date(messageData.createdAt())) + "]");
-            BaseComponent[] message = new BaseComponent[0];
-            switch (messageData.msgType()) {
-                case STRING_MESSAGE -> message = TextComponent.fromLegacyText(messageData.msg());
-                case JSON -> message = ComponentSerializer.parse(messageData.msg());
-                default -> {
-                    var optI18n = AoLibPlugin.getI18n();
-                    if (optI18n.isPresent()) {
-                        message = TextComponent.fromLegacyText(optI18n.get().getFormatted("message.unknown_message_type", messageData.msgType().toString()));
-                    }
+    private List<Integer> sendMessageData(List<AoMessageData> messageData) {//async
+        if (messageData.isEmpty()) return List.of();
+        var resultOptional = TaskUtils.async.getSync(() -> {
+            List<Integer> result = Lists.newArrayList();
+            for (AoMessageData data : messageData) {
+                if (sendMessageData0(data)) {
+                    result.add(data.msgId());
                 }
             }
-            player.spigot().sendMessage(ObjectArrays.concat(pre, message, BaseComponent.class));
-            return true;
+            return result;
         });
+        if (resultOptional.isEmpty()) return List.of();
+        return resultOptional.get();
+    }
+
+    private boolean sendMessageData0(@NotNull AoMessageData messageData) {//sync
+        Player player = Bukkit.getPlayer(messageData.player());
+        if (player == null || !player.isOnline()) return false;
+        var pre = TextComponent.fromLegacyText("[" + simpleDateFormat.format(new Date(messageData.createdAt())) + "]");
+        BaseComponent[] message = new BaseComponent[0];
+        switch (messageData.msgType()) {
+            case STRING_MESSAGE -> message = TextComponent.fromLegacyText(messageData.msg());
+            case JSON -> message = ComponentSerializer.parse(messageData.msg());
+            default -> {
+                var optI18n = AoLibPlugin.getI18n();
+                if (optI18n.isPresent()) {
+                    message = TextComponent.fromLegacyText(optI18n.get().getFormatted("message.unknown_message_type", messageData.msgType().toString()));
+                }
+            }
+        }
+        player.spigot().sendMessage(ObjectArrays.concat(pre, message, BaseComponent.class));
+        return true;
     }
 
     public void initDB() {
@@ -192,35 +222,34 @@ public class AoMessage {
             }
             e.printStackTrace();
         }
+        Optional<Connection> conn = Optional.empty();
         try {
-            var conn = DatabaseUtils.newSqliteJdbcConnection(plugin, "ao_message.db").get();
-            if (conn.isEmpty()) {
-                plugin.getLogger().warning("[AO MSG]Failed to create jdbc connection");
-            } else {
-                this.jdbcConnection = conn.get();
-                return Optional.of(this.jdbcConnection);
-            }
+            conn = DatabaseUtils.newSqliteJdbcConnection(plugin, "ao_message.db").get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
+        }
+        if (conn.isEmpty()) {
+            plugin.getLogger().warning("[AO MSG]Failed to create jdbc connection");
+        } else {
+            this.jdbcConnection = conn.get();
+            try {
+                this.jdbcConnection.createStatement().executeUpdate("PRAGMA synchronous = NORMAL;");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return Optional.of(this.jdbcConnection);
         }
         return Optional.empty();
     }
 
     void AfterPlayerJoin(UUID playerId) {
         getPlayerOfflineMessageList(playerId)
-                .thenAcceptAsync(list -> list.forEach(msgData -> {
-                            List<Integer> MsgIds = Lists.newArrayList();
-                            if (sendMessageData(msgData)) {
-                                MsgIds.add(msgData.msgId());
-                            }
-                            try {
-                                deleteOfflineMessage(MsgIds).get();
-                            } catch (InterruptedException | ExecutionException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                ));
+                .thenAcceptAsync(list -> {
+                    try {
+                        deleteOfflineMessage(sendMessageData(list)).get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
-
-
 }
