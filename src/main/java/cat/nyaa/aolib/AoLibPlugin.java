@@ -8,6 +8,7 @@ import cat.nyaa.aolib.aoui.item.IUiItem;
 import cat.nyaa.aolib.message.AoMessage;
 import cat.nyaa.aolib.npc.NpcManager;
 import cat.nyaa.aolib.utils.EntityDataUtils;
+import cat.nyaa.aolib.utils.TaskUtils;
 import cat.nyaa.nyaacore.LanguageRepository;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -88,6 +89,7 @@ public final class AoLibPlugin extends JavaPlugin {
             taskManager.destructor();
             taskManager = null;
         }
+        TaskUtils.async.onTick();
 
         if (DEBUG) this.debugDisable();
     }

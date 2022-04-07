@@ -3,6 +3,7 @@ package cat.nyaa.aolib.utils;
 import cat.nyaa.aolib.AoLibPlugin;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -74,38 +75,38 @@ public class TaskUtils {
             }
         }
 
+        public static <T> T getSyncDefault(@NotNull Supplier<@NotNull T> supplier, @Nullable T defaultValue) {
+            var result = getSync(supplier);
+            if (result.isEmpty()) {
+                return defaultValue;
+            }
+            return result.get();
+        }
+
         public static <T> Optional<T> getSync(@NotNull Supplier<T> supplier) {
-            var resultOptional = callSync(supplier);
-            if (resultOptional.isPresent()) {
-                try {
-                    return Optional.ofNullable(resultOptional.get().get());
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+            try {
+                return Optional.ofNullable(getSyncThrow(supplier));
+            } catch (CancellationException cancellationException) {
+                if (AoLibPlugin.instance != null) {
+                    AoLibPlugin.instance.getLogger().warning("Task cancelled");
                 }
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
             }
             return Optional.empty();
         }
 
-        public static <T> Optional<CompletableFuture<T>> callSync(@NotNull Supplier<T> supplier) {
+        public static <T> T getSyncThrow(@NotNull Supplier<T> supplier) throws ExecutionException, InterruptedException,
+                CancellationException {
+            var result = callSync(supplier);
+            return result.get();
+        }
+
+        public static <T> CompletableFuture<T> callSync(@NotNull Supplier<T> supplier) {
             if (Bukkit.isPrimaryThread()) {
-                try {
-                    return Optional.of(CompletableFuture.completedFuture(supplier.get()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return Optional.empty();
-                }
+                return CompletableFuture.completedFuture(supplier.get());
             } else {
-                try {
-                    return Optional.of(runSyncMethod(supplier));
-                } catch (CancellationException cancellationException) {
-                    if (AoLibPlugin.instance != null) {
-                        AoLibPlugin.instance.getLogger().warning("Task cancelled");
-                    }
-                    return Optional.empty();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return Optional.empty();
-                }
+                return runSyncMethod(supplier);
             }
         }
 
