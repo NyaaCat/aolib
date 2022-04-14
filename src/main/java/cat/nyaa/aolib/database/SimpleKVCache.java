@@ -2,7 +2,6 @@ package cat.nyaa.aolib.database;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -20,6 +19,12 @@ public class SimpleKVCache<K, V> {
         this.cache = new ConcurrentHashMap<>();
         reload();
     }
+
+    /**
+     * reload all data from provider
+     *
+     * @return the CompletableFuture that executes the update task, or empty if failed.
+     */
 
     public Optional<CompletableFuture<?>> reload() {
         if (loaded.get() == 0) {
@@ -39,15 +44,22 @@ public class SimpleKVCache<K, V> {
         return Optional.ofNullable(this.loadFuture);
     }
 
+
+    /**
+     * @return true if cache is loaded
+     */
     public boolean isLoaded() {
         return loaded.get() > 0;
     }
 
+    /**
+     * wait until cache is loaded
+     */
     public void waitToLoad() {
         loadFuture.join();
     }
 
-    public void checkLoaded() {
+    private void checkLoaded() {
         if (loaded.get() == 0) {
             waitToLoad();
         }
@@ -56,20 +68,46 @@ public class SimpleKVCache<K, V> {
         }
     }
 
+    /**
+     * get value from cache
+     *
+     * @param k KEY
+     * @return VALUE
+     */
     public V get(K k) {
         checkLoaded();
         return cache.get(k);
     }
+
+    /**
+     * tests if specified key in the cache
+     *
+     * @param k KEY
+     * @return true if key exists
+     */
 
     public boolean containsKey(K k) {
         checkLoaded();
         return cache.containsKey(k);
     }
 
+    /**
+     * tests if specified value in the cache
+     *
+     * @param v VALUE
+     * @return true if value exists
+     */
     public boolean containsValue(V v) {
         checkLoaded();
         return cache.containsValue(v);
     }
+
+    /**
+     * get value and update cache
+     *
+     * @param k KEY
+     * @return VALUE
+     */
 
     public CompletableFuture<Optional<V>> getAndUpdateCache(K k) {
         checkLoaded();
@@ -83,7 +121,13 @@ public class SimpleKVCache<K, V> {
     }
 
 
-    //insert or update
+    /**
+     * insert or update
+     *
+     * @param k KEY
+     * @param v VALUE
+     * @return true if inserted
+     */
     public CompletableFuture<Boolean> put(K k, V v) {
         checkLoaded();
         CompletableFuture<Boolean> cf;
@@ -99,13 +143,18 @@ public class SimpleKVCache<K, V> {
             }
             return b;
         }).exceptionally(throwable -> {
-            if (throwable instanceof SQLException) {
-                //todo
-            }
+//            if (throwable instanceof SQLException) {
+//                //todo
+//            }
             throwable.printStackTrace();
             return false;
         });
     }
+
+    /**
+     * @param k KEY
+     * @return true if deleted
+     */
 
     public CompletableFuture<Boolean> remove(K k) {
         checkLoaded();
@@ -125,15 +174,15 @@ public class SimpleKVCache<K, V> {
 
 
     public interface simpleDataProvider<K, V> {
-        CompletableFuture<Optional<V>> get(K key); // throw SQLException
+        CompletableFuture<Optional<V>> get(@NotNull K key); // throw SQLException
 
         CompletableFuture<Optional<Map<K, V>>> getAll(); // throw SQLException
 
-        CompletableFuture<Boolean> insert(K key, V value); // throw SQLException
+        CompletableFuture<@NotNull Boolean> insert(@NotNull K key, @NotNull V value); // throw SQLException
 
-        CompletableFuture<Boolean> update(K key, V value); // throw SQLException
+        CompletableFuture<@NotNull Boolean> update(@NotNull K key, @NotNull V value); // throw SQLException
 
-        CompletableFuture<Boolean> remove(K key); // throw SQLException
+        CompletableFuture<@NotNull Boolean> remove(@NotNull K key); // throw SQLException
     }
 
 }
