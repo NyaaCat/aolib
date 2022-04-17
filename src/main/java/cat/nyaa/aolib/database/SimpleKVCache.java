@@ -1,9 +1,14 @@
 package cat.nyaa.aolib.database;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -103,6 +108,39 @@ public class SimpleKVCache<K, V> {
     }
 
     /**
+     * @return immutable map of cache
+     */
+    public Map<K, V> getAll() {
+        checkLoaded();
+        return ImmutableMap.copyOf(cache);
+    }
+
+    /**
+     * @return immutable value list of cache
+     */
+    public List<V> values() {
+        checkLoaded();
+        return ImmutableList.copyOf(cache.values());
+    }
+
+    /**
+     * @return immutable key list of cache
+     */
+    public Set<K> keySet() {
+        checkLoaded();
+        return ImmutableSet.copyOf(cache.keySet());
+    }
+
+    /**
+     * @return size of cache
+     */
+
+    public int size() {
+        checkLoaded();
+        return cache.size();
+    }
+
+    /**
      * get value and update cache
      *
      * @param k KEY
@@ -119,7 +157,6 @@ public class SimpleKVCache<K, V> {
             return Optional.empty();
         });
     }
-
 
     /**
      * insert or update
