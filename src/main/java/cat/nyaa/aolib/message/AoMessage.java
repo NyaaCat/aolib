@@ -55,6 +55,10 @@ public class AoMessage {
         return instance;
     }
 
+    public static Optional<AoMessage> getInstanceOptional() {
+        return Optional.ofNullable(instance);
+    }
+
     public void destructor() {
         if (this.jdbcConnection != null) {
             try {
