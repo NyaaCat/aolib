@@ -22,8 +22,9 @@ public class SimpleKVCache<K, V> {
     public SimpleKVCache(@NotNull simpleDataProvider<K, V> provider) {
         this.provider = provider;
         this.cache = new ConcurrentHashMap<>();
-        reload();
+        reload0();
     }
+
 
     /**
      * reload all data from provider
@@ -31,11 +32,15 @@ public class SimpleKVCache<K, V> {
      * @return the CompletableFuture that executes the update task, or empty if failed.
      */
 
-    public Optional<CompletableFuture<?>> reload() {
-        if (loaded.get() != 0) {
+    public synchronized Optional<CompletableFuture<?>> reload() {
+        if (loaded.get() == 0) {
             return Optional.empty();
         }
         this.loaded.set(0);
+        return reload0();
+    }
+
+    private Optional<CompletableFuture<?>> reload0() {
         this.loadFuture = provider.getAll()
                 .thenAccept(optionalMap -> optionalMap.ifPresentOrElse((map) -> {
                     cache.putAll(map);
