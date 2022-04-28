@@ -32,7 +32,7 @@ public class SimpleKVCache<K, V> {
      */
 
     public Optional<CompletableFuture<?>> reload() {
-        if (loaded.get() == 0) {
+        if (loaded.get() != 0) {
             return Optional.empty();
         }
         this.loaded.set(0);
