@@ -3,7 +3,6 @@ package cat.nyaa.aolib.network.packet.game;
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -18,18 +17,6 @@ public abstract class WrappedClientboundMoveEntityPacket extends AbstractWrapped
 
     protected WrappedClientboundMoveEntityPacket(int entityId, short xa, short ya, short za, byte yRot, byte xRot, boolean onGround, boolean hasRot, boolean hasPos) throws RuntimeException {
         this(createPacket(entityId, xa, ya, za, yRot, xRot, onGround, hasRot, hasPos));
-    }
-
-    public static double packetToEntity(long packetP) {
-        return (double) packetP / 4096.0D;
-    }
-
-    public static long entityToPacket(double entityP) {
-        return (long) Math.floor(entityP * 4096.0D);
-    }
-
-    public static @NotNull Vector packetToEntity(long xp, long yp, long zp) {
-        return (new Vector((double) xp, (double) yp, (double) zp)).multiply((double) 2.4414062E-4F);// x/4096
     }
 
     private static @NotNull PacketContainer createPacket(int entityId, short xa, short ya, short za, byte yRot, byte xRot, boolean onGround, boolean hasRot, boolean hasPos) throws RuntimeException {

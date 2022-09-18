@@ -1,7 +1,7 @@
 package cat.nyaa.aolib.npc;
 
 import cat.nyaa.aolib.network.packet.AbstractWrappedPacket;
-import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddMobPacket;
+import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddEntityPacket;
 import cat.nyaa.aolib.npc.data.NpcEquipmentData;
 
 public interface IAoLivingEntityNpc extends IAoEntityNpc {
@@ -11,7 +11,7 @@ public interface IAoLivingEntityNpc extends IAoEntityNpc {
     }
 
     default AbstractWrappedPacket getAddEntityPacket() {
-        return new WrappedClientboundAddMobPacket(this);
+        return new WrappedClientboundAddEntityPacket(this);
     }
 
     default NpcEquipmentData getNpcEquipmentData() {

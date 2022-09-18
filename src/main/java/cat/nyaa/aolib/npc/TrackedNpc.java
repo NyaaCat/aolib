@@ -44,9 +44,9 @@ public class TrackedNpc {
         int yrotp_ = NetworkUtils.rot2int(this.getAoNpc().getYRot());
         int xrotp_ = NetworkUtils.rot2int(this.getAoNpc().getYRot());
         boolean sendRot = Math.abs(yrotp_ - this.yRotp) >= 1 || Math.abs(xrotp_ - this.xRotp) >= 1;
-        long xp_ = WrappedClientboundMoveEntityPacket.entityToPacket(aoNpc.getX());
-        long yp_ = WrappedClientboundMoveEntityPacket.entityToPacket(aoNpc.getY());
-        long zp_ = WrappedClientboundMoveEntityPacket.entityToPacket(aoNpc.getZ());
+        long xp_ = encodeVecDeltaCodec(aoNpc.getX());
+        long yp_ = encodeVecDeltaCodec(aoNpc.getY());
+        long zp_ = encodeVecDeltaCodec(aoNpc.getZ());
         long i = xp_ - xp;
         long j = yp_ - yp;
         long k = zp_ - zp;
@@ -120,13 +120,17 @@ public class TrackedNpc {
 
     }
 
+    private long encodeVecDeltaCodec(double p) {
+        return (long) Math.floor( p * 4096.0D);
+    }
+
     public IAoEntityNpc getAoNpc() {
         return aoNpc;
     }
 
     private void updateSentPos() {
-        this.xp = WrappedClientboundMoveEntityPacket.entityToPacket(this.aoNpc.getX());
-        this.yp = WrappedClientboundMoveEntityPacket.entityToPacket(this.aoNpc.getY());
-        this.zp = WrappedClientboundMoveEntityPacket.entityToPacket(this.aoNpc.getZ());
+        this.xp = encodeVecDeltaCodec(this.aoNpc.getX());
+        this.yp = encodeVecDeltaCodec(this.aoNpc.getY());
+        this.zp = encodeVecDeltaCodec(this.aoNpc.getZ());
     }
 }

@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id("xyz.jpenilla.run-paper") version "1.0.6"
 }
-def minecraftVer = "1.18.2"
+def minecraftVer = "1.19.2"
 group = 'cat.nyaa'
 archivesBaseName = "${project.name}-mc$minecraftVer"
 
@@ -19,8 +19,9 @@ version = '1.0' + "." + buildNumber
 
 repositories {
     mavenCentral()
+    maven { name 'papermc'; url "https://repo.papermc.io/repository/maven-public/" }
     maven { name 'Bugjang'; url 'https://libraries.minecraft.net' }
-    maven { url = "https://repo.dmulloy2.net/repository/public/" }
+    maven { name 'dmulloy2'; url 'https://repo.dmulloy2.net/content/groups/public/' }
     maven { name = 'spigotmc-repo'; url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url = 'https://oss.sonatype.org/content/repositories/central' }
@@ -31,7 +32,8 @@ repositories {
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:$minecraftVer-R0.1-SNAPSHOT"
-    compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0"
+    compileOnly files(deobfedJar)
+    compileOnly(group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.0.0-SNAPSHOT")
     // other nyaa plugins
     compileOnly('cat.nyaa:nyaacore:9.0-SNAPSHOT')
     compileOnly 'org.jetbrains:annotations:23.0.0'
@@ -43,10 +45,10 @@ dependencies {
     testImplementation files(deobfedJar)
     //testImplementation "org.spigotmc:spigot:$minecraftVer-R0.1-SNAPSHOT"
 
-    testImplementation 'org.xerial:sqlite-jdbc:3.36.0.3'
-    testImplementation 'com.github.seeseemelk:MockBukkit-v1.18:1.24.1'
+    testImplementation 'org.xerial:sqlite-jdbc:3.39.3.0'
+    testImplementation 'com.github.seeseemelk:MockBukkit-v1.19:2.119.3'
     testImplementation "org.spigotmc:spigot:$minecraftVer-R0.1-SNAPSHOT"
-    testImplementation(platform('org.junit:junit-bom:5.8.2'))
+    testImplementation(platform('org.junit:junit-bom:5.9.0'))
     testImplementation('org.junit.jupiter:junit-jupiter')
 }
 

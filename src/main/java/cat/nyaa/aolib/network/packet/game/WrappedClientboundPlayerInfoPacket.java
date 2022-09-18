@@ -27,7 +27,7 @@ public class WrappedClientboundPlayerInfoPacket extends AbstractWrappedPacket {
 
 
     public static @NotNull PacketContainer createPacket(EnumWrappers.PlayerInfoAction action, List<PlayerInfoData> playerInfoDataList) {
-        PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
+        PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);//todo need test
         packetContainer.getPlayerInfoAction().write(0, action);
         packetContainer.getPlayerInfoDataLists().write(0, playerInfoDataList);
         return packetContainer;
