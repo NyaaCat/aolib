@@ -6,7 +6,8 @@ import cat.nyaa.aolib.aoui.data.WindowClickData;
 import cat.nyaa.aolib.aoui.network.UIPacketListener;
 import cat.nyaa.aolib.network.packet.game.*;
 import cat.nyaa.aolib.utils.TaskUtils;
-import com.comphenix.protocol.wrappers.ComponentConverter;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -154,7 +155,7 @@ public class UIManager {
             sendCloseWindow(player);
         }
         try {
-            new WrappedClientboundOpenScreenPacket(ui.getWindowId(), ui.getTypeId(), ComponentConverter.fromBaseComponent(ui.getTitle(player))).sendServerPacket(player);
+            new WrappedClientboundOpenScreenPacket(ui.getWindowId(), ui.getTypeId(), WrappedChatComponent.fromJson(GsonComponentSerializer.gson().serialize(ui.getTitle(player)))).sendServerPacket(player);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }

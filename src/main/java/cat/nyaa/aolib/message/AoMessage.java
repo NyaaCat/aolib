@@ -2,15 +2,13 @@ package cat.nyaa.aolib.message;
 
 import cat.nyaa.aolib.AoLibPlugin;
 import cat.nyaa.aolib.message.data.AoMessageData;
+import cat.nyaa.aolib.utils.ChatComponentUtils;
 import cat.nyaa.aolib.utils.DBFunctionUtils;
 import cat.nyaa.aolib.utils.DatabaseUtils;
 import cat.nyaa.aolib.utils.TaskUtils;
 import com.google.common.collect.Lists;
-import com.google.common.collect.ObjectArrays;
 import com.google.common.primitives.Ints;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -82,12 +80,14 @@ public class AoMessage {
         }
     }
 
-    public void sendMessageTo(UUID playerId, BaseComponent... messages) {
+    public void sendMessageTo(UUID playerId, Component... messages) {
         var player = Bukkit.getPlayer(playerId);
-        if (player == null || !player.isOnline()) {
-            this.newOfflineMessage(playerId, JSON, ComponentSerializer.toString(messages));
-        } else {
-            player.spigot().sendMessage(messages);
+        for (Component message : messages) {
+            if (player == null || !player.isOnline()) {
+                this.newOfflineMessage(playerId, JSON, ChatComponentUtils.toJson(message));
+            } else {
+                player.sendMessage(message);
+            }
         }
     }
 
@@ -154,7 +154,7 @@ public class AoMessage {
                 var data = Optional.of(ps.executeBatch());
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 conn.commit();
-                if (autoCommit) conn.setAutoCommit(autoCommit);
+                if (autoCommit) conn.setAutoCommit(true);
 
                 return data;
             } catch (SQLException e) {
@@ -188,19 +188,19 @@ public class AoMessage {
     private boolean sendMessageData0(@NotNull AoMessageData messageData) {//sync
         Player player = Bukkit.getPlayer(messageData.player());
         if (player == null || !player.isOnline()) return false;
-        var pre = TextComponent.fromLegacyText("[" + simpleDateFormat.format(new Date(messageData.createdAt())) + "]");
-        BaseComponent[] message = new BaseComponent[0];
+        var pre = ChatComponentUtils.fromLegacyText("[" + simpleDateFormat.format(new Date(messageData.createdAt())) + "]");
+        Component message = Component.empty();
         switch (messageData.msgType()) {
-            case STRING_MESSAGE -> message = TextComponent.fromLegacyText(messageData.msg());
-            case JSON -> message = ComponentSerializer.parse(messageData.msg());
+            case STRING_MESSAGE -> message = ChatComponentUtils.fromLegacyText(messageData.msg());
+            case JSON -> message = ChatComponentUtils.fromJson(messageData.msg());
             default -> {
                 var optI18n = AoLibPlugin.getI18n();
                 if (optI18n.isPresent()) {
-                    message = TextComponent.fromLegacyText(optI18n.get().getFormatted("message.unknown_message_type", messageData.msgType().toString()));
+                    message = ChatComponentUtils.fromLegacyText(optI18n.get().getFormatted("message.unknown_message_type", messageData.msgType().toString()));
                 }
             }
         }
-        player.spigot().sendMessage(ObjectArrays.concat(pre, message, BaseComponent.class));
+        player.sendMessage(Component.text().append(pre).append(message).build());
         return true;
     }
 

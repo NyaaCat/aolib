@@ -7,9 +7,9 @@ import cat.nyaa.aolib.aoui.item.CommandUiItem;
 import cat.nyaa.aolib.aoui.item.IUiItem;
 import cat.nyaa.aolib.message.AoMessage;
 import cat.nyaa.aolib.npc.NpcManager;
-import cat.nyaa.aolib.utils.EntityDataUtils;
 import cat.nyaa.aolib.utils.TaskUtils;
 import cat.nyaa.nyaacore.LanguageRepository;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -32,6 +32,7 @@ public final class AoLibPlugin extends JavaPlugin {
     @Nullable
     public static AoLibPlugin instance = null;
     private static AolibI18n I18n = null;
+    private boolean isTest = false;
     private NpcManager debug_npcManager;
     private UIManager debug_uiManager;
     private AoMessage AoMsg;
@@ -40,8 +41,9 @@ public final class AoLibPlugin extends JavaPlugin {
     public AoLibPlugin() {
     }
 
-    private AoLibPlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+    private AoLibPlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file, boolean test) {
         super(loader, description, dataFolder, file);
+        this.isTest = test;
     }
 
     public static Optional<AolibI18n> getI18n() {
@@ -57,7 +59,6 @@ public final class AoLibPlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         instance = this;
-        EntityDataUtils.init();
         saveDefaultConfig();
         reloadConfig();
         I18n = new AolibI18n(this, this.getConfig().getString("language", LanguageRepository.DEFAULT_LANGUAGE));
@@ -104,14 +105,13 @@ public final class AoLibPlugin extends JavaPlugin {
         if (DEBUG) {
             this.debugCommand(sender, command, label, args);
         }
-        if (args.length >= 1) switch (args[0].toLowerCase(Locale.ROOT)) {
-            case "reload":
-                if (!sender.hasPermission("aolib.command.reload")) return false;
-                this.onReload();
-                getI18n().ifPresent(I18n -> sender.sendMessage(I18n.getFormatted("command.reload.complete")));
-                return true;
-            default:
-                return false;
+        if (args.length >= 1) if ("reload".equals(args[0].toLowerCase(Locale.ROOT))) {
+            if (!sender.hasPermission("aolib.command.reload")) return false;
+            this.onReload();
+            getI18n().ifPresent(I18n -> sender.sendMessage(I18n.getFormatted("command.reload.complete")));
+            return true;
+        } else {
+            return false;
         }
         return true;
     }
@@ -132,7 +132,7 @@ public final class AoLibPlugin extends JavaPlugin {
         var item = new ItemStack(Material.BAKED_POTATO);
         var meta = item.getItemMeta();
         if (meta == null) return item;
-        meta.setDisplayName(String.valueOf(num));
+        meta.displayName(Component.text(num));
         item.setItemMeta(meta);
         return item;
     }

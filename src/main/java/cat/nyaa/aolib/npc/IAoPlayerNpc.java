@@ -5,8 +5,8 @@ import cat.nyaa.aolib.network.packet.game.WrappedClientboundAddPlayerPacket;
 import cat.nyaa.aolib.npc.data.NpcEntityData;
 import cat.nyaa.aolib.npc.data.NpcPlayerPropertyData;
 import cat.nyaa.aolib.npc.data.NpcSkinData;
-import cat.nyaa.aolib.utils.EntityDataUtils;
 import com.google.common.collect.Lists;
+import net.minecraft.world.entity.player.Player;
 import org.bukkit.GameMode;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,8 @@ public interface IAoPlayerNpc extends IAoLivingEntityNpc {
 
     default List<NpcEntityData> getNpcEntityDataList() {
         var result = new ArrayList<>(IAoLivingEntityNpc.super.getNpcEntityDataList());
-        result.add(new NpcEntityData(EntityDataUtils.PLAYER_ENTITY_DATA_PLAYER_MODE_CUSTOMISATION_ID, (byte) 0x7F, Byte.class, false));
+        //EntityDataUtils.PLAYER_ENTITY_DATA_PLAYER_MODE_CUSTOMISATION_ID
+        result.add(new NpcEntityData(Player.DATA_PLAYER_MODE_CUSTOMISATION.getId(), (byte) 0x7F, Byte.class, false));
         return result;
     }
 }

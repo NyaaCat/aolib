@@ -35,11 +35,12 @@ public class WrappedClientboundAddEntityPacket extends AbstractWrappedPacket {
                 aoNpc.getEntitySpawnData()
         ));
     }
+
     public WrappedClientboundAddEntityPacket(IAoLivingEntityNpc livingEntityNpc) {
-        this((IAoEntityNpc)livingEntityNpc);
+        this((IAoEntityNpc) livingEntityNpc);
     }
 
-    private static @NotNull PacketContainer createPacket(int id, UUID uuid, EntityType type,double x, double y, double z, int xa, int ya, int za, byte xRot, byte yRot, byte yHeadRot, int data) {
+    private static @NotNull PacketContainer createPacket(int id, UUID uuid, EntityType type, double x, double y, double z, int xa, int ya, int za, byte xRot, byte yRot, byte yHeadRot, int data) {
 
         PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
         packetContainer.getIntegers().write(0, id);

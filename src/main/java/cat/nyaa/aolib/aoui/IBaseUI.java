@@ -1,7 +1,7 @@
 package cat.nyaa.aolib.aoui;
 
 import cat.nyaa.aolib.aoui.data.WindowClickData;
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ public interface IBaseUI {
     int getTypeId();
 
     @NotNull
-    BaseComponent getTitle(Player player);
+    Component getTitle(Player player);
 
     @NotNull
     List<ItemStack> getWindowItem(Player player);

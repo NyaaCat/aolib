@@ -1,7 +1,10 @@
+import java.nio.charset.StandardCharsets
+
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id("xyz.jpenilla.run-paper") version "1.0.6"
+    id 'io.papermc.paperweight.userdev' version '1.3.8'
+    id 'xyz.jpenilla.run-paper' version '1.0.6' // Adds runServer and runMojangMappedServer tasks for testing
 }
 def minecraftVer = "1.19.2"
 group = 'cat.nyaa'
@@ -11,11 +14,7 @@ def buildNumber = System.getenv('BUILD_NUMBER') == null ? "x" : System.getenv('B
 def mavenDirectory = System.getenv('MAVEN_DIR') == null ? "$projectDir/repo" : System.getenv('MAVEN_DIR')
 def jdDirectory = System.getenv('JAVADOCS_DIR') == null ? null : System.getenv('JAVADOCS_DIR')
 
-String deobfedJar = DownloadFile(System.env.NMS_JAR, mavenDirectory,
-        "spigot-${minecraftVer}-latest-deobfed.jar",
-        "https://ci.nyaacat.com/maven/spigot-${minecraftVer}-latest-deobfed.jar")
-
-version = '1.0' + "." + buildNumber
+version = '1.1' + "." + buildNumber
 
 repositories {
     mavenCentral()
@@ -31,42 +30,42 @@ repositories {
 }
 
 dependencies {
-    compileOnly "org.spigotmc:spigot-api:$minecraftVer-R0.1-SNAPSHOT"
-    compileOnly files(deobfedJar)
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:$minecraftVer-R0.1-SNAPSHOT")
+
     compileOnly(group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.0.0-SNAPSHOT")
     // other nyaa plugins
-    compileOnly('cat.nyaa:nyaacore:9.0-SNAPSHOT')
+    compileOnly('cat.nyaa:nyaacore:9.2.11-SNAPSHOT')
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
     //plugin
-    testImplementation('cat.nyaa:nyaacore:9.0-SNAPSHOT')
+    testImplementation('cat.nyaa:nyaacore:9.2.11-SNAPSHOT')
     testImplementation group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0"
     //spigot
-    testImplementation files(deobfedJar)
-    //testImplementation "org.spigotmc:spigot:$minecraftVer-R0.1-SNAPSHOT"
 
     testImplementation 'org.xerial:sqlite-jdbc:3.39.3.0'
     testImplementation 'com.github.seeseemelk:MockBukkit-v1.19:2.119.3'
-    testImplementation "org.spigotmc:spigot:$minecraftVer-R0.1-SNAPSHOT"
+
     testImplementation(platform('org.junit:junit-bom:5.9.0'))
     testImplementation('org.junit.jupiter:junit-jupiter')
 }
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    withSourcesJar()
+    withJavadocJar()
+}
+assemble {
+    dependsOn(reobfJar)
 }
 
 compileJava {
     options.compilerArgs += ["-Xlint:deprecation"]
-    options.encoding = 'UTF-8'
+    options.encoding = StandardCharsets.UTF_8.name()
     options.release.set(17)
 }
 
 javadoc {
-//    source = sourceSets.main.allJava
-    // javadoc output folder
     if (jdDirectory != null) destinationDir = file("${jdDirectory}/${rootProject.name}-${version}")
-
     options.with {
         links 'https://docs.oracle.com/en/java/javase/17/docs/api/'
         links 'https://hub.spigotmc.org/javadocs/spigot/'
@@ -99,22 +98,15 @@ processResources {
     }
 }
 
-task sourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
-    from sourceSets.main.allSource
-    //from sourceSets.main.java.srcDirs
+reobfJar{
+    outputJar.set(layout.buildDirectory.file("libs/${project.name}-mc${minecraftVer}-${project.version}.jar"))
 }
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set('javadoc')
-    from javadoc.destinationDir
-}
+
 
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-            artifact sourcesJar
-            artifact javadocJar
         }
     }
     repositories {
@@ -122,34 +114,4 @@ publishing {
             url mavenDirectory
         }
     }
-}
-
-String DownloadFile(String manual_override, String mavenDirectory, String filename, String url) {
-    String ret = ""
-    if (manual_override != null) {
-        ret = manual_override
-        if (new File(ret).exists()) {
-            logger.warn("Manually selected: ${ret}")
-            return ret
-        } else {
-            throw new GradleException("File not found: ${ret}")
-        }
-    }
-
-    // ci environment
-    if (new File("${mavenDirectory}/${filename}").exists()) {
-        return "${mavenDirectory}/${filename}"
-    }
-
-    // check local dir (dev environment)
-    ret = "${projectDir}/../nms_binaries/${filename}"
-    if (!(new File(ret).exists())) {
-        // nms not found, download from nyaaci
-        def f = new File(ret)
-        println "Downloading ${filename}"
-        f.getParentFile().mkdirs()
-        new URL(url).withInputStream { i -> f.withOutputStream { it << i } }
-    }
-    println("Found file: ${filename} => ${ret}")
-    return ret
 }

@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import static cat.nyaa.aolib.utils.ChatComponentUtils.createWrappedChatComponent;
 import static com.comphenix.protocol.ProtocolLibrary.getProtocolManager;
 
 public class NpcManager {
@@ -186,7 +187,7 @@ public class NpcManager {
                 getPlayerNpcGameProfile(playerNpc),
                 playerNpc.getLatency(),
                 EnumWrappers.NativeGameMode.fromBukkit(playerNpc.getGameMode()),
-                ComponentConverter.fromBaseComponent(playerNpc.getDisplayName())
+                createWrappedChatComponent(playerNpc.getDisplayName())
         );
     }
 

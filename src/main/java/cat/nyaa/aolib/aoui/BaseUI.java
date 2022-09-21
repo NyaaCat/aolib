@@ -3,8 +3,7 @@ package cat.nyaa.aolib.aoui;
 import cat.nyaa.aolib.aoui.item.EmptyUIItem;
 import cat.nyaa.aolib.aoui.item.IUiItem;
 import cat.nyaa.aolib.aoui.item.PlayerInventoryItem;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -52,8 +51,8 @@ public class BaseUI implements IBaseUI {
     }//GENERIC_9x6
 
     @Override
-    public @NotNull BaseComponent getTitle(Player player) {
-        return new TextComponent("");
+    public @NotNull Component getTitle(Player player) {
+        return Component.text("");
     }
 
     @Override

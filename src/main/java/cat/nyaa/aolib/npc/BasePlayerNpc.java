@@ -2,8 +2,7 @@ package cat.nyaa.aolib.npc;
 
 import cat.nyaa.aolib.npc.data.NpcSkinData;
 import cat.nyaa.aolib.utils.NpcUtils;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +22,7 @@ public class BasePlayerNpc implements IAoPlayerNpc {
     public BasePlayerNpc(Player clone) {
         this.Location = clone.getLocation();
         this.name = clone.getName() + "Npc";
-        this.displayName = clone.getDisplayName();
+        this.displayName = clone.displayName().toString();
 
         skinData = NpcUtils.getPlayerSkinData(clone);
 
@@ -75,8 +74,8 @@ public class BasePlayerNpc implements IAoPlayerNpc {
     }
 
     @Override
-    public @Nullable BaseComponent getDisplayName() {
-        return new TextComponent(displayName);
+    public @Nullable Component getDisplayName() {
+        return Component.text(displayName);
     }
 
     @Override

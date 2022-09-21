@@ -121,7 +121,7 @@ public class TrackedNpc {
     }
 
     private long encodeVecDeltaCodec(double p) {
-        return (long) Math.floor( p * 4096.0D);
+        return (long) Math.floor(p * 4096.0D);
     }
 
     public IAoEntityNpc getAoNpc() {

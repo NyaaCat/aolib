@@ -6,7 +6,7 @@ import cat.nyaa.aolib.npc.data.NpcEntityData;
 import cat.nyaa.aolib.npc.data.NpcInteractActionData;
 import cat.nyaa.nyaacore.utils.EntityUtils;
 import com.google.common.collect.Lists;
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -91,7 +91,7 @@ public interface IAoEntityNpc {
     String getName();
 
     @Nullable
-    BaseComponent getDisplayName();
+    Component getDisplayName();
 
     default AbstractWrappedPacket getAddEntityPacket() {
         return new WrappedClientboundAddEntityPacket(this);

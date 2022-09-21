@@ -8,8 +8,7 @@ import cat.nyaa.aolib.aoui.item.IClickableUiItem;
 import cat.nyaa.aolib.aoui.item.IUiItem;
 import cat.nyaa.aolib.network.data.DataClickType;
 import com.google.common.collect.Lists;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -45,14 +44,6 @@ public class PageUI extends BaseUI {
         this.uiTitle = uiTitle;
     }
 
-    @Override
-    public void onWindowOpen(@NotNull Player player) {
-        super.onWindowOpen(player);
-        if (this.getPage(player.getUniqueId()) != 0) {
-            this.setPage(player.getUniqueId(), 0);
-        }
-    }
-
     public static @NotNull List<IUiItem> getAllSimpleButtonUiItem(PageUI pageUI) {
         var uiItemArray = new IUiItem[9];
         Arrays.fill(uiItemArray, EmptyUIItem.EMPTY_UI_ITEM);
@@ -63,40 +54,45 @@ public class PageUI extends BaseUI {
 
     @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull CallBackUiItem getSimplePageButtonUiItem(PageUI pageUI, ButtonPageType type) {
-        return new CallBackUiItem((
-                (clickData, player) -> {
-                    var playerUniqueId = player.getUniqueId();
-                    if (clickData.clickType().equals(DataClickType.PICKUP)) {
-                        switch (type) {
-                            case NEXT -> {
-                                if (pageUI.hasNextPage(playerUniqueId)) pageUI.nextPage(playerUniqueId);
-                            }
-                            case PREV -> {
-                                if (pageUI.hasPrevPage(playerUniqueId)) pageUI.prevPage(playerUniqueId);
-                            }
-                        }
+        return new CallBackUiItem(((clickData, player) -> {
+            var playerUniqueId = player.getUniqueId();
+            if (clickData.clickType().equals(DataClickType.PICKUP)) {
+                switch (type) {
+                    case NEXT -> {
+                        if (pageUI.hasNextPage(playerUniqueId)) pageUI.nextPage(playerUniqueId);
                     }
-                }),
-                ((player) -> {
-                    var playerUniqueId = player.getUniqueId();
-                    if (type == ButtonPageType.PREV) {
-                        if (!pageUI.hasPrevPage(playerUniqueId)) return UIPlayerHold.EMPTY_ITEM.clone();
+                    case PREV -> {
+                        if (pageUI.hasPrevPage(playerUniqueId)) pageUI.prevPage(playerUniqueId);
                     }
-                    if (type == ButtonPageType.NEXT) {
-                        if (!pageUI.hasNextPage(playerUniqueId)) return UIPlayerHold.EMPTY_ITEM.clone();
-                    }
-                    var i18nOptional = AoLibPlugin.getI18n();
-                    if (i18nOptional.isEmpty()) return new ItemStack(Material.ARROW);
-                    var pluginI18n = i18nOptional.get();
-                    var itemStack = new ItemStack(Material.ARROW);
-                    var meta = itemStack.getItemMeta();
-                    if (meta != null) {
-                        meta.setDisplayName(type == ButtonPageType.NEXT ? pluginI18n.getFormatted("ui.item.button.next") : pluginI18n.getFormatted("ui.item.button.last"));
-                    }
-                    itemStack.setItemMeta(meta);
-                    return itemStack;
-                })
-        );
+                }
+            }
+        }), ((player) -> {
+            var playerUniqueId = player.getUniqueId();
+            if (type == ButtonPageType.PREV) {
+                if (!pageUI.hasPrevPage(playerUniqueId)) return UIPlayerHold.EMPTY_ITEM.clone();
+            }
+            if (type == ButtonPageType.NEXT) {
+                if (!pageUI.hasNextPage(playerUniqueId)) return UIPlayerHold.EMPTY_ITEM.clone();
+            }
+            var i18nOptional = AoLibPlugin.getI18n();
+            if (i18nOptional.isEmpty()) return new ItemStack(Material.ARROW);
+            var pluginI18n = i18nOptional.get();
+            var itemStack = new ItemStack(Material.ARROW);
+            var meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.displayName(Component.text(type == ButtonPageType.NEXT ? pluginI18n.getFormatted("ui.item.button.next") : pluginI18n.getFormatted("ui.item.button.last")));
+            }
+            itemStack.setItemMeta(meta);
+            return itemStack;
+        }));
+    }
+
+    @Override
+    public void onWindowOpen(@NotNull Player player) {
+        super.onWindowOpen(player);
+        if (this.getPage(player.getUniqueId()) != 0) {
+            this.setPage(player.getUniqueId(), 0);
+        }
     }
 
     public void setAllUiItem(List<IUiItem> allUiItem) {
@@ -154,8 +150,8 @@ public class PageUI extends BaseUI {
     }
 
     @Override
-    public @NotNull BaseComponent getTitle(Player player) {
-        return new TextComponent(this.uiTitle);
+    public @NotNull Component getTitle(Player player) {
+        return Component.text(this.uiTitle);
     }
 
     private @NotNull List<IUiItem> getPageUiItem(Player player) {
