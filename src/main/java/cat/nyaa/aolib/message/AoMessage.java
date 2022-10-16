@@ -9,6 +9,8 @@ import cat.nyaa.aolib.utils.TaskUtils;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import net.kyori.adventure.text.Component;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -91,6 +93,15 @@ public class AoMessage {
         }
     }
 
+    @Deprecated // BungeeCord Chat API has been deprecated in favor of Adventure API.
+    public void sendMessageTo(UUID playerId, BaseComponent... messages) {
+        var player = Bukkit.getPlayer(playerId);
+        if (player == null || !player.isOnline()) {
+            this.newOfflineMessage(playerId, JSON, ComponentSerializer.toString(messages));
+        } else {
+            player.spigot().sendMessage(messages);
+        }
+    }
     private CompletableFuture<Boolean> newOfflineMessage(UUID playerId, AoMessageData.MessageType messageType, String messageStr) {
         var result = getConnection(
                 (conn) ->

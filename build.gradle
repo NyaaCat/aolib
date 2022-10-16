@@ -43,7 +43,7 @@ dependencies {
     //spigot
 
     testImplementation 'org.xerial:sqlite-jdbc:3.39.3.0'
-    testImplementation 'com.github.seeseemelk:MockBukkit-v1.19:2.119.3'
+    testImplementation 'com.github.seeseemelk:MockBukkit-v1.19:2.122.0'
 
     testImplementation(platform('org.junit:junit-bom:5.9.0'))
     testImplementation('org.junit.jupiter:junit-jupiter')
