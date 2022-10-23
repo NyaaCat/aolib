@@ -34,7 +34,7 @@ dependencies {
 
     compileOnly(group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.0.0-SNAPSHOT")
     // other nyaa plugins
-    compileOnly('cat.nyaa:nyaacore:9.2.11-SNAPSHOT')
+    compileOnly('cat.nyaa:nyaacore:9.2.14-SNAPSHOT')
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
     //plugin

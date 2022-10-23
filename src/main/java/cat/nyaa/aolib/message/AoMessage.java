@@ -102,6 +102,7 @@ public class AoMessage {
             player.spigot().sendMessage(messages);
         }
     }
+
     private CompletableFuture<Boolean> newOfflineMessage(UUID playerId, AoMessageData.MessageType messageType, String messageStr) {
         var result = getConnection(
                 (conn) ->

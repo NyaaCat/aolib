@@ -1,20 +1,13 @@
 package cat.nyaa.aolib;
 
-import cat.nyaa.aolib.aoui.IBaseUI;
-import cat.nyaa.aolib.aoui.PageUI;
-import cat.nyaa.aolib.aoui.UIManager;
-import cat.nyaa.aolib.aoui.item.CommandUiItem;
-import cat.nyaa.aolib.aoui.item.IUiItem;
+import cat.nyaa.aolib.command.AolibCommand;
+import cat.nyaa.aolib.command.subcommand.AoDebugCommand;
+import cat.nyaa.aolib.i18n.AoI18n;
 import cat.nyaa.aolib.message.AoMessage;
-import cat.nyaa.aolib.npc.NpcManager;
 import cat.nyaa.aolib.utils.TaskUtils;
 import cat.nyaa.nyaacore.LanguageRepository;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
@@ -22,8 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -33,10 +26,9 @@ public final class AoLibPlugin extends JavaPlugin {
     public static AoLibPlugin instance = null;
     private static AolibI18n I18n = null;
     private boolean isTest = false;
-    private NpcManager debug_npcManager;
-    private UIManager debug_uiManager;
     private AoMessage AoMsg;
     private AolibTaskManager taskManager;
+    private AolibCommand command;
 
     public AoLibPlugin() {
     }
@@ -44,6 +36,10 @@ public final class AoLibPlugin extends JavaPlugin {
     private AoLibPlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file, boolean test) {
         super(loader, description, dataFolder, file);
         this.isTest = test;
+    }
+
+    public static boolean isDEBUG() {
+        return DEBUG;
     }
 
     public static Optional<AolibI18n> getI18n() {
@@ -62,21 +58,21 @@ public final class AoLibPlugin extends JavaPlugin {
         saveDefaultConfig();
         reloadConfig();
         I18n = new AolibI18n(this, this.getConfig().getString("language", LanguageRepository.DEFAULT_LANGUAGE));
+        AoI18n.load(this);
     }
 
     @Override
     public void onEnable() {
         this.AoMsg = new AoMessage(this);
         this.taskManager = new AolibTaskManager(this);
-        if (DEBUG) this.debugEnable();
+        this.command = new AolibCommand(this);
+        Objects.requireNonNull(this.getCommand("aolib")).setExecutor(command);
+        Objects.requireNonNull(this.getCommand("aolib")).setTabCompleter(command);
+        if (isDEBUG()) AoDebugCommand.debugEnable(this);
     }
 
-    private void debugEnable() {
-        this.debug_npcManager = new NpcManager(this);
-        this.debug_uiManager = new UIManager(this);
-    }
 
-    private void onReload() {
+    public void onReload() {
         this.reloadConfig();
     }
 
@@ -92,19 +88,13 @@ public final class AoLibPlugin extends JavaPlugin {
         }
         TaskUtils.async.onTick();
 
-        if (DEBUG) this.debugDisable();
+        if (isDEBUG()) AoDebugCommand.debugDisable();
     }
 
-    private void debugDisable() {
-        this.debug_npcManager.destructor();
-        this.debug_uiManager.destructor();
-    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (DEBUG) {
-            this.debugCommand(sender, command, label, args);
-        }
+
         if (args.length >= 1) if ("reload".equals(args[0].toLowerCase(Locale.ROOT))) {
             if (!sender.hasPermission("aolib.command.reload")) return false;
             this.onReload();
@@ -117,23 +107,4 @@ public final class AoLibPlugin extends JavaPlugin {
     }
 
 
-    private void debugCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player) {
-            //debug_npcManager.sendAddNpc((Player) sender, new BasePlayerNpc((Player) sender));
-            var itemList = new ArrayList<IUiItem>();
-            for (int i = 0; i < 100; i++) {
-                itemList.add(CommandUiItem.create(getDebugItem(i), null, "me " + i, null));
-            }
-            debug_uiManager.sendOpenWindow((Player) sender, new PageUI(itemList, (IBaseUI ui) -> debug_uiManager.broadcastFullState(ui), ""));
-        }
-    }
-
-    private ItemStack getDebugItem(int num) {
-        var item = new ItemStack(Material.BAKED_POTATO);
-        var meta = item.getItemMeta();
-        if (meta == null) return item;
-        meta.displayName(Component.text(num));
-        item.setItemMeta(meta);
-        return item;
-    }
 }
